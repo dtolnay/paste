@@ -1,0 +1,16 @@
+[package]
+name = "paste-impl"
+version = "0.0.0"
+authors = ["David Tolnay <dtolnay@gmail.com>"]
+license = "MIT/Apache-2.0"
+description = "Implementation detail of the `paste` crate"
+repository = "https://github.com/dtolnay/paste"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+proc-macro-hack = "0.5"
+proc-macro2 = "0.4"
+quote = "0.6"
+syn = "0.15"
