@@ -16,7 +16,7 @@ including using pasted identifiers to define new items.
 
 ```toml
 [dependencies]
-paste = "0.0"
+paste = "0.1"
 ```
 
 This approach works with any stable or nightly Rust compiler 1.30+.
