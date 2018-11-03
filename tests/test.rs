@@ -154,3 +154,22 @@ fn test_local_variable() {
         assert_eq!([<y y>], 0);
     }
 }
+
+mod test_none_delimited_single_ident {
+    macro_rules! m {
+        ($id:ident) => {
+            paste::item! {
+                fn f() -> &'static str {
+                    stringify!($id)
+                }
+            }
+        };
+    }
+
+    m!(i32x4);
+
+    #[test]
+    fn test() {
+        assert_eq!(f(), "i32x4");
+    }
+}
