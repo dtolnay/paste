@@ -145,3 +145,19 @@ fn test_false_start() {
         assert_eq!(x[0], 0);
     }
 }
+
+macro_rules! crate_not_valid_identifier {
+    ($module:ident) => {
+        struct $module;
+    };
+    () => {
+        paste::item! {
+            $crate::crate_not_valid_identifier! { [<Lib env!("CARGO_PKG_NAME")>] }
+        }
+    }
+}
+
+#[test]
+fn test_crate_not_valid_identifier() {
+   crate_not_valid_identifier!();
+}
