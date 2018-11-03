@@ -109,13 +109,6 @@
 //! #
 //! # fn main() {}
 //! ```
-//!
-//! # Limitations
-//!
-//! - As a consequence of hygiene, a concatenated identifier may not be used to
-//!   refer to a captured local variable ([#1]).
-//!
-//! [#1]: https://github.com/dtolnay/paste/issues/1
 
 extern crate paste_impl;
 extern crate proc_macro_hack;
