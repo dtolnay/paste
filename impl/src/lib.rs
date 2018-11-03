@@ -55,6 +55,8 @@ impl Parse for PasteInput {
                         let segments = parse_bracket_as_segments.parse2(content)?;
                         let pasted = paste_segments(span, &segments)?;
                         pasted.to_tokens(&mut expanded);
+                    } else if delimiter == Delimiter::None && is_single_ident(&content) {
+                        content.to_tokens(&mut expanded);
                     } else {
                         let nested = PasteInput::parse.parse2(content)?;
                         let mut group = Group::new(delimiter, nested.expanded);
@@ -72,6 +74,17 @@ impl Parse for PasteInput {
 fn is_paste_operation(input: &TokenStream) -> bool {
     let input = input.clone();
     parse_bracket_as_segments.parse2(input).is_ok()
+}
+
+fn is_single_ident(input: &TokenStream) -> bool {
+    let mut has_ident = false;
+    for tt in input.clone() {
+        match tt {
+            TokenTree::Ident(_) if !has_ident => has_ident = true,
+            _ => return false,
+        }
+    }
+    has_ident
 }
 
 enum Segment {
