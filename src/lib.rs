@@ -125,3 +125,10 @@ pub use paste_impl::expr;
 /// An item is like a struct definition, function, impl block, or anything else
 /// that can appear at the top level of a module scope.
 pub use paste_impl::item;
+
+/// Paste identifiers within a macro invocation that expands to one or more
+/// macro_rules macros or items containing macros.
+pub use paste_impl::item_with_macros;
+
+#[doc(hidden)]
+pub use paste_impl::EnumHack;

@@ -4,6 +4,8 @@ extern crate proc_macro_hack;
 extern crate quote;
 extern crate syn;
 
+mod enum_hack;
+
 use proc_macro2::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
 use proc_macro_hack::proc_macro_hack;
 use quote::{quote, ToTokens};
@@ -17,11 +19,23 @@ pub fn item(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     proc_macro::TokenStream::from(input.expanded)
 }
 
+#[proc_macro]
+pub fn item_with_macros(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    let input = parse_macro_input!(input as PasteInput);
+    proc_macro::TokenStream::from(enum_hack::wrap(input.expanded))
+}
+
 #[proc_macro_hack]
 pub fn expr(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as PasteInput);
     let output = input.expanded;
     proc_macro::TokenStream::from(quote!({ #output }))
+}
+
+#[doc(hidden)]
+#[proc_macro_derive(EnumHack)]
+pub fn enum_hack(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
+    enum_hack::extract(input)
 }
 
 struct PasteInput {
