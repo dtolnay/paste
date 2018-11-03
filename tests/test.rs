@@ -145,3 +145,12 @@ fn test_false_start() {
         assert_eq!(x[0], 0);
     }
 }
+
+#[test]
+fn test_local_variable() {
+    let yy = 0;
+
+    paste::expr! {
+        assert_eq!([<y y>], 0);
+    }
+}

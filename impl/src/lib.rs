@@ -39,7 +39,7 @@ impl Parse for PasteInput {
                     let span = group.span();
                     if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
                         let segments = parse_bracket_as_segments.parse2(content)?;
-                        let pasted = paste_segments(&segments)?;
+                        let pasted = paste_segments(span, &segments)?;
                         pasted.to_tokens(&mut expanded);
                     } else {
                         let nested = PasteInput::parse.parse2(content)?;
@@ -123,7 +123,7 @@ fn parse_segments(input: ParseStream) -> Result<Vec<Segment>> {
     Ok(segments)
 }
 
-fn paste_segments(segments: &[Segment]) -> Result<TokenStream> {
+fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
     let mut pasted = String::new();
     let mut is_lifetime = false;
 
@@ -151,7 +151,7 @@ fn paste_segments(segments: &[Segment]) -> Result<TokenStream> {
         }
     }
 
-    let ident = TokenTree::Ident(Ident::new(&pasted, Span::call_site()));
+    let ident = TokenTree::Ident(Ident::new(&pasted, span));
     let tokens = if is_lifetime {
         let apostrophe = TokenTree::Punct(Punct::new('\'', Spacing::Joint));
         vec![apostrophe, ident]

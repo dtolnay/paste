@@ -120,13 +120,6 @@ fn call_some_getters(s: &S) -> bool {
 }
 ```
 
-## Limitations
-
-- As a consequence of hygiene, a concatenated identifier may not be used to
-  refer to a captured local variable ([#1]).
-
-[#1]: https://github.com/dtolnay/paste/issues/1
-
 <br>
 
 #### License
