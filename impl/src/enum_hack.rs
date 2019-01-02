@@ -4,8 +4,8 @@ use std::hash::{Hash, Hasher};
 use proc_macro;
 use proc_macro2::{Ident, Span, TokenStream, TokenTree};
 use quote::quote;
-use syn::{braced, parenthesized, parse_macro_input, Token};
 use syn::parse::{Parse, ParseStream, Result};
+use syn::{braced, parenthesized, parse_macro_input, Token};
 
 pub fn wrap(output: TokenStream) -> TokenStream {
     let mut hasher = DefaultHasher::default();
