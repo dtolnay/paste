@@ -110,6 +110,8 @@
 //! # fn main() {}
 //! ```
 
+#![no_std]
+
 extern crate paste_impl;
 extern crate proc_macro_hack;
 
