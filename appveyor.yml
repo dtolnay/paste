@@ -6,7 +6,7 @@ environment:
     - platform: x86_64                # Name (is not used other than naming things)
       target: x86_64-pc-windows-msvc  # Triple of target platform
       channel: stable                 # Rust release channel (stable/beta/nightly/nightly-2018-12-01)
-      test_script: cargo test --target=%target% --verbose
+      tests: "cargo test --target=%target% --verbose"
     - platform: arm64
       target: aarch64-pc-windows-msvc 
       channel: stable
@@ -22,6 +22,8 @@ install:
 
 build_script:
     - cargo build --release --target=%target%      # Builds file defined in Cargo.toml (default main.rs)
+
+test_script: %tests%
 
 artifacts:                          
     - path: target\$(target)\release\*$(APPVEYOR_PROJECT_NAME)*.*     # Publishes all files from `cargo build/test/bench --release`
