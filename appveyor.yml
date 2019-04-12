@@ -23,7 +23,8 @@ install:
 build_script:
     - cargo build --release --target=%target%      # Builds file defined in Cargo.toml (default main.rs)
 
-test_script: %tests%
+test_script: 
+    - %tests%
 
 artifacts:                          
     - path: target\$(target)\release\*$(APPVEYOR_PROJECT_NAME)*.*     # Publishes all files from `cargo build/test/bench --release`
