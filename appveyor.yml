@@ -26,12 +26,3 @@ build_script:
 artifacts:                          
     - path: target\$(target)\release\*$(APPVEYOR_PROJECT_NAME)*.*     # Publishes all files from `cargo build/test/bench --release`
       name: $(APPVEYOR_PROJECT_NAME)-$(platform)                      # Gives it a fancy name
-
-deploy:
-  - provider: GitHub
-    artifact: $(APPVEYOR_PROJECT_NAME)-$(platform)
-    auth_token:
-      secure: 'hY5Mk6KOwgQ97TzEBsM7Woqr1ZIm5QTvHg8EvxMV1x8j3wk/3mNBMqWFFbEIBK0i'
-    prerelease: true
-    on:
-      appveyor_repo_tag: true
