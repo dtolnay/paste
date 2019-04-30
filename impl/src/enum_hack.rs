@@ -1,7 +1,6 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 
-use proc_macro;
 use proc_macro2::{Ident, Span, TokenStream, TokenTree};
 use quote::quote;
 use syn::parse::{Parse, ParseStream, Result};
