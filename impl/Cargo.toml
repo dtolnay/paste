@@ -2,6 +2,7 @@
 name = "paste-impl"
 version = "0.1.5"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
+edition = "2018"
 license = "MIT/Apache-2.0"
 description = "Implementation detail of the `paste` crate"
 repository = "https://github.com/dtolnay/paste"

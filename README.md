@@ -30,8 +30,6 @@ Within either one, identifiers inside `[<`...`>]` are pasted together to form a
 single identifier.
 
 ```rust
-extern crate paste;
-
 // Macro in item position: at module scope or inside of an impl block.
 paste::item! {
     // Defines a const called `QRST`.
@@ -54,8 +52,6 @@ of a more convenient user-facing macro of your own. Here the `routes!(A, B)`
 macro expands to a vector containing `ROUTE_A` and `ROUTE_B`.
 
 ```rust
-extern crate paste;
-
 const ROUTE_A: &str = "/a";
 const ROUTE_B: &str = "/b";
 
@@ -77,8 +73,6 @@ The next example shows a macro that generates accessor methods for some struct
 fields.
 
 ```rust
-extern crate paste;
-
 macro_rules! make_a_struct_and_getters {
     ($name:ident { $($field:ident),* }) => {
         // Define a struct. This expands to:

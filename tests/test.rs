@@ -1,5 +1,3 @@
-extern crate paste;
-
 mod test_basic {
     struct Struct;
 
