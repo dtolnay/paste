@@ -8,6 +8,9 @@ description = "Macros for all your token pasting needs"
 repository = "https://github.com/dtolnay/paste"
 readme = "README.md"
 
+[badges]
+travis-ci = { repository = "dtolnay/paste" }
+
 [dependencies]
 paste-impl = { version = "=0.1.6", path = "impl" }
 proc-macro-hack = "0.5"
