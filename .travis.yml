@@ -7,3 +7,12 @@ rust:
   - nightly
 
 script: cargo test
+
+matrix:
+  include:
+    - rust: nightly
+      name: Minimal versions
+      before_script:
+        - cargo -Z minimal-versions generate-lockfile
+      script:
+        - cargo check --locked
