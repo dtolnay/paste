@@ -171,3 +171,22 @@ mod test_none_delimited_single_ident {
         assert_eq!(f(), "i32x4");
     }
 }
+
+mod test_to_lower {
+    macro_rules! m {
+        ($id:ident) => {
+            paste::item! {
+                fn [<my_ $id:lower _here>](_arg: u8) -> &'static str {
+                    stringify!([<$id:lower>])
+                }
+            }
+        };
+    }
+
+    m!(Test);
+
+    #[test]
+    fn test_to_lower() {
+        assert_eq!(my_test_here(0), "test");
+    }
+}
