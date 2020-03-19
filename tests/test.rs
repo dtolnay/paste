@@ -190,3 +190,12 @@ mod test_to_lower {
         assert_eq!(my_test_here(0), "test");
     }
 }
+
+#[test]
+fn test_env_to_lower() {
+    paste::expr! {
+        struct [<Lib env!("CARGO_PKG_NAME"):lower>];
+
+        let _ = Libpaste;
+    }
+}
