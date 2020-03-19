@@ -7,7 +7,7 @@ use proc_macro_hack::proc_macro_hack;
 use quote::{quote, ToTokens};
 use std::iter::FromIterator;
 use syn::parse::{Error, Parse, ParseStream, Parser, Result};
-use syn::{parenthesized, parse_macro_input, Lit, LitStr, Token};
+use syn::{parenthesized, parse_macro_input, Ident as SynIdent, Lit, LitStr, Token};
 
 #[proc_macro]
 pub fn item(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
@@ -131,6 +131,20 @@ fn parse_segments(input: ParseStream) -> Result<Vec<Segment>> {
             TokenTree::Punct(punct) => match punct.as_char() {
                 '_' => segments.push(Segment::String("_".to_string())),
                 '\'' => segments.push(Segment::Apostrophe(punct.span())),
+                ':' => {
+                    let cs = match segments.pop() {
+                        Some(Segment::String(cs)) => cs,
+                        _ => return Err(Error::new(punct.span(), "unexpected punct")),
+                    };
+                    if !input.peek(SynIdent) {
+                        return Err(Error::new(punct.span(), "unexpected punct"));
+                    }
+                    if input.parse::<SynIdent>()? != "lower" {
+                        return Err(Error::new(punct.span(), "unsupported ident modifier"));
+                    }
+
+                    segments.push(Segment::String(cs.to_lowercase()));
+                }
                 _ => return Err(Error::new(punct.span(), "unexpected punct")),
             },
             TokenTree::Group(group) => {
