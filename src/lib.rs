@@ -9,6 +9,8 @@
 //!
 //! This approach works with any stable or nightly Rust compiler 1.30+.
 //!
+//! <br>
+//!
 //! # Pasting identifiers
 //!
 //! There are two entry points, `paste::expr!` for macros in expression position and
@@ -32,6 +34,8 @@
 //!     );
 //! }
 //! ```
+//!
+//! <br><br>
 //!
 //! # More elaborate examples
 //!
@@ -103,6 +107,18 @@
 //! #
 //! # fn main() {}
 //! ```
+//!
+//! <br><br>
+//!
+//! # Case conversion
+//!
+//! Use `$var:lower` in the segment list to convert an interpolated segment to
+//! lowercase as part of the paste. For example, `[<ld_ $reg:lower _expr>]`
+//! would paste to `ld_bc_expr` if invoked with $reg=`Bc`.
+//!
+//! The precise Unicode conversion is as defined by [`str::to_lowercase`].
+//!
+//! [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
 
 #![no_std]
 
