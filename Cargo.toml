@@ -15,6 +15,10 @@ travis-ci = { repository = "dtolnay/paste" }
 paste-impl = { version = "=0.1.7", path = "impl" }
 proc-macro-hack = "0.5.9"
 
+[dev-dependencies]
+rustversion = "1.0"
+trybuild = "1.0"
+
 [workspace]
 members = ["impl"]
 
