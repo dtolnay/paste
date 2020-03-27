@@ -181,6 +181,8 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
                 };
                 if ident == "lower" {
                     evaluated.push(last.to_lowercase());
+                } else if ident == "upper" {
+                    evaluated.push(last.to_uppercase());
                 } else {
                     return Err(Error::new_spanned(span, "unsupported modifier"));
                 }

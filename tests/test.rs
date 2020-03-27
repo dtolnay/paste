@@ -199,3 +199,29 @@ fn test_env_to_lower() {
         let _ = Libpaste;
     }
 }
+
+mod test_to_upper {
+    macro_rules! m {
+        ($id:ident) => {
+            paste::item! {
+                const [<MY_ $id:upper _HERE>]: &str = stringify!([<$id:upper>]);
+            }
+        };
+    }
+
+    m!(Test);
+
+    #[test]
+    fn test_to_upper() {
+        assert_eq!(MY_TEST_HERE, "TEST");
+    }
+}
+
+#[test]
+fn test_env_to_upper() {
+    paste::expr! {
+        const [<LIB env!("CARGO_PKG_NAME"):upper>]: &str = "libpaste";
+
+        let _ = LIBPASTE;
+    }
+}
