@@ -1,5 +1,5 @@
 paste::item! {
-    fn [<a:upper>]() {}
+    fn [<a:pillow>]() {}
 }
 
 fn main() {}
