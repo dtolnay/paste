@@ -122,13 +122,15 @@ fn call_some_getters(s: &S) -> bool {
 
 ## Case conversion
 
-Use `$var:lower` in the segment list to convert an interpolated segment to
-lowercase as part of the paste. For example, `[<ld_ $reg:lower _expr>]` would
-paste to `ld_bc_expr` if invoked with $reg=`Bc`.
+Use `$var:lower` or `$var:upper` in the segment list to convert an interpolated
+segment to lower- or uppercase as part of the paste. For example, `[<ld_
+$reg:lower _expr>]` would paste to `ld_bc_expr` if invoked with $reg=`Bc`.
 
-The precise Unicode conversion is as defined by [`str::to_lowercase`].
+The precise Unicode conversion is as defined by [`str::to_lowercase`] and
+[`str::to_uppercase`].
 
 [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
+[`str::to_uppercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_uppercase
 
 <br>
 
