@@ -117,7 +117,10 @@
 //! example, `[<ld_ $reg:lower _expr>]` would paste to `ld_bc_expr` if invoked
 //! with $reg=`Bc`.
 //!
-//! The precise Unicode conversion is as defined by [`str::to_lowercase`] and
+//! Use `$var:snake` to convert CamelCase input to snake\_case. These compose,
+//! so for example `$var:snake:upper` would give you SCREAMING\_CASE.
+//!
+//! The precise Unicode conversions are as defined by [`str::to_lowercase`] and
 //! [`str::to_uppercase`].
 //!
 //! [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
