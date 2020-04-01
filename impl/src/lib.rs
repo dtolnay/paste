@@ -183,6 +183,18 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
                     evaluated.push(last.to_lowercase());
                 } else if ident == "upper" {
                     evaluated.push(last.to_uppercase());
+                } else if ident == "snake" {
+                    if last.contains('_') {
+                        return Err(Error::new_spanned(span, "unexpected snake modifier: already contains underscore"));
+                    }
+                    let mut acc = String::new();
+                    last.chars().enumerate().for_each(|(i, c)| {
+                        if i != 0 && c.is_uppercase() {
+                            acc.push('_');
+                        }
+                        acc.push(c);
+                    });
+                    evaluated.push(acc);
                 } else {
                     return Err(Error::new_spanned(span, "unsupported modifier"));
                 }

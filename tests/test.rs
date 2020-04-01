@@ -225,3 +225,33 @@ fn test_env_to_upper() {
         let _ = LIBPASTE;
     }
 }
+
+mod test_to_snake {
+    macro_rules! m {
+        ($id:ident) => {
+            paste::item! {
+                const [<LOWER_CASE_ $id:snake:upper>]: &str = stringify!([<$id:snake:lower>]);
+                const [<UPPER_CASE_ $id:snake:upper>]: &str = stringify!([<$id:snake:upper>]);
+                const [<ORIGINAL_CASE_ $id:snake:upper>]: &str = stringify!([<$id:snake>]);
+            }
+        };
+    }
+
+    m!(ThisIsButATest);
+
+    #[test]
+    fn test_to_snake() {
+        assert_eq!(LOWER_CASE_THIS_IS_BUT_A_TEST, "this_is_but_a_test");
+        assert_eq!(UPPER_CASE_THIS_IS_BUT_A_TEST, "THIS_IS_BUT_A_TEST");
+        assert_eq!(ORIGINAL_CASE_THIS_IS_BUT_A_TEST, "This_Is_But_A_Test");
+    }
+}
+
+#[test]
+fn test_env_to_snake() {
+    paste::expr! {
+        const [<LIB env!("CARGO_PKG_NAME"):snake:upper>]: &str = "libpaste";
+
+        let _ = LIBPASTE;
+    }
+}
