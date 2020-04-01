@@ -193,7 +193,7 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
                         acc.push(ch);
                         prev = ch;
                     }
-                    evaluated.push(acc);
+                    evaluated.push(acc.to_lowercase());
                 } else {
                     return Err(Error::new_spanned(span, "unsupported modifier"));
                 }
