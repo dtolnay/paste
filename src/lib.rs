@@ -117,8 +117,9 @@
 //! example, `[<ld_ $reg:lower _expr>]` would paste to `ld_bc_expr` if invoked
 //! with $reg=`Bc`.
 //!
-//! Use `$var:snake` to convert CamelCase input to snake\_case. These compose,
-//! so for example `$var:snake:upper` would give you SCREAMING\_CASE.
+//! Use `$var:snake` to convert CamelCase input to snake\_case.
+//! Use `$var:camel` to convert snake\_case to CamelCase.
+//! These compose, so for example `$var:snake:upper` would give you SCREAMING\_CASE.
 //!
 //! The precise Unicode conversions are as defined by [`str::to_lowercase`] and
 //! [`str::to_uppercase`].
