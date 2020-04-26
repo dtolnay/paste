@@ -255,3 +255,33 @@ fn test_env_to_snake() {
         let _ = LIBPASTE;
     }
 }
+
+mod test_to_camel {
+    macro_rules! m {
+        ($id:ident) => {
+            paste::item! {
+                const DEFAULT_CAMEL: &str = stringify!([<$id:camel>]);
+                const LOWER_CAMEL: &str = stringify!([<$id:camel:lower>]);
+                const UPPER_CAMEL: &str = stringify!([<$id:camel:upper>]);
+            }
+        };
+    }
+
+    m!(this_is_but_a_test);
+
+    #[test]
+    fn test_to_snake() {
+        assert_eq!(DEFAULT_CAMEL, "ThisIsButATest");
+        assert_eq!(LOWER_CAMEL, "thisisbutatest");
+        assert_eq!(UPPER_CAMEL, "THISISBUTATEST");
+    }
+}
+
+#[test]
+fn test_env_to_camel() {
+    paste::expr! {
+        const [<LIB env!("CARGO_PKG_NAME"):camel>]: &str = "libpaste";
+
+        let _ = LIBPaste;
+    }
+}
