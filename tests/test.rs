@@ -270,7 +270,7 @@ mod test_to_camel {
     m!(this_is_but_a_test);
 
     #[test]
-    fn test_to_snake() {
+    fn test_to_camel() {
         assert_eq!(DEFAULT_CAMEL, "ThisIsButATest");
         assert_eq!(LOWER_CAMEL, "thisisbutatest");
         assert_eq!(UPPER_CAMEL, "THISISBUTATEST");
