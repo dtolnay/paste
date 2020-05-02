@@ -10,9 +10,6 @@ repository = "https://github.com/dtolnay/paste"
 [lib]
 proc-macro = true
 
-[badges]
-travis-ci = { repository = "dtolnay/paste" }
-
 [dependencies]
 proc-macro-hack = "0.5"
 proc-macro2 = "1.0"
