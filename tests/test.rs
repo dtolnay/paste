@@ -172,6 +172,26 @@ mod test_none_delimited_single_ident {
     }
 }
 
+mod test_none_delimited_single_lifetime {
+    macro_rules! m {
+        ($life:lifetime) => {
+            paste::item! {
+                pub struct S;
+                impl<$life> S {
+                    fn f() {}
+                }
+            }
+        };
+    }
+
+    m!('a);
+
+    #[test]
+    fn test() {
+        S::f();
+    }
+}
+
 mod test_to_lower {
     macro_rules! m {
         ($id:ident) => {
