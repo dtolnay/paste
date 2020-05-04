@@ -51,7 +51,7 @@ impl Parse for PasteInput {
                         let segments = parse_bracket_as_segments.parse2(content)?;
                         let pasted = paste_segments(span, &segments)?;
                         pasted.to_tokens(&mut expanded);
-                    } else if delimiter == Delimiter::None && is_single_ident(&content) {
+                    } else if is_none_delimited_single_ident_or_lifetime(delimiter, &content) {
                         content.to_tokens(&mut expanded);
                     } else {
                         let nested = PasteInput::parse.parse2(content)?;
@@ -72,15 +72,30 @@ fn is_paste_operation(input: &TokenStream) -> bool {
     parse_bracket_as_segments.parse2(input).is_ok()
 }
 
-fn is_single_ident(input: &TokenStream) -> bool {
-    let mut has_ident = false;
-    for tt in input.clone() {
-        match tt {
-            TokenTree::Ident(_) if !has_ident => has_ident = true,
-            _ => return false,
-        }
+// https://github.com/dtolnay/paste/issues/26
+fn is_none_delimited_single_ident_or_lifetime(delimiter: Delimiter, input: &TokenStream) -> bool {
+    if delimiter != Delimiter::None {
+        return false;
     }
-    has_ident
+
+    #[derive(PartialEq)]
+    enum State {
+        Init,
+        Ident,
+        Apostrophe,
+        Lifetime,
+    }
+
+    let mut state = State::Init;
+    for tt in input.clone() {
+        state = match (state, &tt) {
+            (State::Init, TokenTree::Ident(_)) => State::Ident,
+            (State::Init, TokenTree::Punct(punct)) if punct.as_char() == '\'' => State::Apostrophe,
+            (State::Apostrophe, TokenTree::Ident(_)) => State::Lifetime,
+            _ => return false,
+        };
+    }
+    state == State::Ident || state == State::Lifetime
 }
 
 enum Segment {
