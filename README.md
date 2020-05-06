@@ -1,7 +1,7 @@
 Macros for all your token pasting needs
 =======================================
 
-[![Build Status](https://api.travis-ci.org/dtolnay/paste.svg?branch=master)](https://travis-ci.org/dtolnay/paste)
+[![Build Status](https://img.shields.io/github/workflow/status/dtolnay/paste/CI/master)](https://github.com/dtolnay/paste/actions?query=branch%3Amaster)
 [![Latest Version](https://img.shields.io/crates/v/paste.svg)](https://crates.io/crates/paste)
 [![Rust Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://docs.rs/paste)
 
