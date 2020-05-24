@@ -305,3 +305,23 @@ fn test_env_to_camel() {
         let _ = LIBPaste;
     }
 }
+
+mod test_doc_expr {
+    // https://github.com/dtolnay/paste/issues/29
+
+    macro_rules! doc_expr {
+        ($doc:expr) => {
+            paste::item! {
+                #[doc = $doc]
+                pub struct S;
+            }
+        };
+    }
+
+    doc_expr!(stringify!());
+
+    #[test]
+    fn test_doc_expr() {
+        let _: S;
+    }
+}
