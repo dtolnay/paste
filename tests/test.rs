@@ -306,8 +306,7 @@ fn test_env_to_camel() {
     }
 }
 
-#[test]
-fn test_doc_expr() {
+mod test_doc_expr {
     // https://github.com/dtolnay/paste/issues/29
 
     macro_rules! doc_expr {
@@ -321,5 +320,8 @@ fn test_doc_expr() {
 
     doc_expr!(stringify!());
 
-    let _: S;
+    #[test]
+    fn test_doc_expr() {
+        let _: S;
+    }
 }
