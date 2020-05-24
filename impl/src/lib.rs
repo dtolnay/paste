@@ -40,31 +40,46 @@ struct PasteInput {
 
 impl Parse for PasteInput {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut expanded = TokenStream::new();
-        while !input.is_empty() {
-            match input.parse()? {
-                TokenTree::Group(group) => {
-                    let delimiter = group.delimiter();
-                    let content = group.stream();
-                    let span = group.span();
-                    if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
-                        let segments = parse_bracket_as_segments.parse2(content)?;
-                        let pasted = paste_segments(span, &segments)?;
-                        pasted.to_tokens(&mut expanded);
-                    } else if is_none_delimited_single_ident_or_lifetime(delimiter, &content) {
-                        content.to_tokens(&mut expanded);
-                    } else {
-                        let nested = PasteInput::parse.parse2(content)?;
-                        let mut group = Group::new(delimiter, nested.expanded);
-                        group.set_span(span);
-                        group.to_tokens(&mut expanded);
-                    }
-                }
-                other => other.to_tokens(&mut expanded),
-            }
-        }
+        let mut contains_paste = false;
+        let expanded = parse(input, &mut contains_paste)?;
         Ok(PasteInput { expanded })
     }
+}
+
+fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
+    let mut expanded = TokenStream::new();
+    while !input.is_empty() {
+        let save = input.fork();
+        match input.parse()? {
+            TokenTree::Group(group) => {
+                let delimiter = group.delimiter();
+                let content = group.stream();
+                let span = group.span();
+                if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
+                    let segments = parse_bracket_as_segments.parse2(content)?;
+                    let pasted = paste_segments(span, &segments)?;
+                    pasted.to_tokens(&mut expanded);
+                    *contains_paste = true;
+                } else if is_none_delimited_single_ident_or_lifetime(delimiter, &content) {
+                    content.to_tokens(&mut expanded);
+                } else {
+                    let mut group_contains_paste = false;
+                    let nested = (|input: ParseStream| parse(input, &mut group_contains_paste))
+                        .parse2(content)?;
+                    if group_contains_paste {
+                        let mut group = Group::new(delimiter, nested);
+                        group.set_span(span);
+                        group.to_tokens(&mut expanded);
+                        *contains_paste |= group_contains_paste;
+                    } else {
+                        save.parse::<TokenTree>()?.to_tokens(&mut expanded);
+                    }
+                }
+            }
+            other => other.to_tokens(&mut expanded),
+        }
+    }
+    Ok(expanded)
 }
 
 fn is_paste_operation(input: &TokenStream) -> bool {
