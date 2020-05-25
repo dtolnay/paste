@@ -305,3 +305,42 @@ fn test_env_to_camel() {
         let _ = LIBPaste;
     }
 }
+
+mod test_type_in_path {
+    // https://github.com/dtolnay/paste/issues/31
+
+    mod keys {
+        #[derive(Default)]
+        pub struct Mib<T = ()>(std::marker::PhantomData<T>);
+    }
+
+    macro_rules! types {
+        ($mib:ty) => {
+            paste::item! {
+                #[derive(Default)]
+                pub struct S(pub keys::$mib);
+            }
+        };
+    }
+
+    macro_rules! write {
+        ($fn:ident, $field:ty) => {
+            paste::item! {
+                pub fn $fn() -> $field {
+                    $field::default()
+                }
+            }
+        };
+    }
+
+    types! {Mib<[usize; 2]>}
+    write! {get_a, keys::Mib}
+    write! {get_b, usize}
+
+    #[test]
+    fn test_type_in_path() {
+        let _: S;
+        let _ = get_a;
+        let _ = get_b;
+    }
+}
