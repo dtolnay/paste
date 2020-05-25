@@ -48,6 +48,7 @@ impl Parse for PasteInput {
 
 fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
     let mut expanded = TokenStream::new();
+    let (mut prev_colons, mut colons) = (false, false);
     while !input.is_empty() {
         let save = input.fork();
         match input.parse()? {
@@ -55,6 +56,7 @@ fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
                 let delimiter = group.delimiter();
                 let content = group.stream();
                 let span = group.span();
+                let in_path = prev_colons || input.peek(Token![::]);
                 if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
                     let segments = parse_bracket_as_segments.parse2(content)?;
                     let pasted = paste_segments(span, &segments)?;
@@ -62,22 +64,31 @@ fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
                     *contains_paste = true;
                 } else if is_none_delimited_single_ident_or_lifetime(delimiter, &content) {
                     content.to_tokens(&mut expanded);
+                    *contains_paste |= in_path;
                 } else {
                     let mut group_contains_paste = false;
                     let nested = (|input: ParseStream| parse(input, &mut group_contains_paste))
                         .parse2(content)?;
-                    if group_contains_paste {
+                    let group = if group_contains_paste {
                         let mut group = Group::new(delimiter, nested);
                         group.set_span(span);
-                        group.to_tokens(&mut expanded);
-                        *contains_paste |= group_contains_paste;
+                        *contains_paste = true;
+                        group
                     } else {
-                        save.parse::<TokenTree>()?.to_tokens(&mut expanded);
+                        group.clone()
+                    };
+                    if in_path && delimiter == Delimiter::None {
+                        group.stream().to_tokens(&mut expanded);
+                        *contains_paste = true;
+                    } else {
+                        group.to_tokens(&mut expanded);
                     }
                 }
             }
             other => other.to_tokens(&mut expanded),
         }
+        prev_colons = colons;
+        colons = save.peek(Token![::]);
     }
     Ok(expanded)
 }
