@@ -381,3 +381,20 @@ mod test_pat_in_expr_position {
 
     rav1e_bad!(std::fmt::Error);
 }
+
+mod test_x86_feature_literal {
+    // work around https://github.com/rust-lang/rust/issues/72726
+
+    macro_rules! my_is_x86_feature_detected {
+        ($feat:literal) => {
+            paste::item! {
+                #[test]
+                fn test() {
+                    let _ = is_x86_feature_detected!($feat);
+                }
+            }
+        };
+    }
+
+    my_is_x86_feature_detected!("mmx");
+}
