@@ -56,15 +56,14 @@ fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
                 let delimiter = group.delimiter();
                 let content = group.stream();
                 let span = group.span();
-                let in_path = prev_colons || input.peek(Token![::]);
                 if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
                     let segments = parse_bracket_as_segments.parse2(content)?;
                     let pasted = paste_segments(span, &segments)?;
                     pasted.to_tokens(&mut expanded);
                     *contains_paste = true;
-                } else if is_none_delimited_single_ident_or_lifetime(delimiter, &content) {
+                } else if is_none_delimited_flat_group(delimiter, &content) {
                     content.to_tokens(&mut expanded);
-                    *contains_paste |= in_path;
+                    *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
                     let nested = (|input: ParseStream| parse(input, &mut group_contains_paste))
@@ -77,6 +76,7 @@ fn parse(input: ParseStream, contains_paste: &mut bool) -> Result<TokenStream> {
                     } else {
                         group.clone()
                     };
+                    let in_path = prev_colons || input.peek(Token![::]);
                     if in_path && delimiter == Delimiter::None {
                         group.stream().to_tokens(&mut expanded);
                         *contains_paste = true;
@@ -99,7 +99,7 @@ fn is_paste_operation(input: &TokenStream) -> bool {
 }
 
 // https://github.com/dtolnay/paste/issues/26
-fn is_none_delimited_single_ident_or_lifetime(delimiter: Delimiter, input: &TokenStream) -> bool {
+fn is_none_delimited_flat_group(delimiter: Delimiter, input: &TokenStream) -> bool {
     if delimiter != Delimiter::None {
         return false;
     }
@@ -108,20 +108,36 @@ fn is_none_delimited_single_ident_or_lifetime(delimiter: Delimiter, input: &Toke
     enum State {
         Init,
         Ident,
+        Literal,
         Apostrophe,
         Lifetime,
+        Colon1,
+        Colon2,
     }
 
     let mut state = State::Init;
     for tt in input.clone() {
         state = match (state, &tt) {
             (State::Init, TokenTree::Ident(_)) => State::Ident,
+            (State::Init, TokenTree::Literal(_)) => State::Literal,
             (State::Init, TokenTree::Punct(punct)) if punct.as_char() == '\'' => State::Apostrophe,
             (State::Apostrophe, TokenTree::Ident(_)) => State::Lifetime,
+            (State::Ident, TokenTree::Punct(punct))
+                if punct.as_char() == ':' && punct.spacing() == Spacing::Joint =>
+            {
+                State::Colon1
+            }
+            (State::Colon1, TokenTree::Punct(punct))
+                if punct.as_char() == ':' && punct.spacing() == Spacing::Alone =>
+            {
+                State::Colon2
+            }
+            (State::Colon2, TokenTree::Ident(_)) => State::Ident,
             _ => return false,
         };
     }
-    state == State::Ident || state == State::Lifetime
+
+    state == State::Ident || state == State::Literal || state == State::Lifetime
 }
 
 enum Segment {

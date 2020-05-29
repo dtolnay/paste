@@ -12,13 +12,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.31.0]
+        rust: [nightly, beta, stable, 1.32.0]
+        include:
+          - rust: 1.31.0
+            rustflags: --cfg no_literal_matcher
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo test
+        env:
+          RUSTFLAGS: ${{matrix.rustflags}}
 
   minimal:
     name: Minimal versions
