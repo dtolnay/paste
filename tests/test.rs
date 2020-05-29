@@ -382,6 +382,7 @@ mod test_pat_in_expr_position {
     rav1e_bad!(std::fmt::Error);
 }
 
+#[cfg(not(no_literal_matcher))]
 mod test_x86_feature_literal {
     // work around https://github.com/rust-lang/rust/issues/72726
 
