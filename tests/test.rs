@@ -364,3 +364,20 @@ mod test_type_in_path {
         let _ = get_b;
     }
 }
+
+mod test_pat_in_expr_position {
+    // https://github.com/xiph/rav1e/pull/2324/files
+
+    macro_rules! rav1e_bad {
+        ($e:pat) => {
+            paste::item! {
+                #[test]
+                fn test() {
+                    let _ = $e;
+                }
+            }
+        };
+    }
+
+    rav1e_bad!(std::fmt::Error);
+}
