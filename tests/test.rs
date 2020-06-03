@@ -386,6 +386,7 @@ mod test_pat_in_expr_position {
 mod test_x86_feature_literal {
     // work around https://github.com/rust-lang/rust/issues/72726
 
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     macro_rules! my_is_x86_feature_detected {
         ($feat:literal) => {
             paste::item! {
@@ -394,6 +395,15 @@ mod test_x86_feature_literal {
                     let _ = is_x86_feature_detected!($feat);
                 }
             }
+        };
+    }
+
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+    macro_rules! my_is_x86_feature_detected {
+        ($feat:literal) => {
+            #[ignore]
+            #[test]
+            fn test() {}
         };
     }
 
