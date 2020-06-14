@@ -153,6 +153,14 @@ fn test_local_variable() {
     }
 }
 
+#[test]
+fn test_empty() {
+    paste::expr! {
+        assert_eq!(stringify!([<y y>]), "yy");
+        assert_eq!(stringify!([<>]).replace(' ', ""), "[<>]");
+    }
+}
+
 mod test_none_delimited_single_ident {
     macro_rules! m {
         ($id:ident) => {
