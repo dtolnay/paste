@@ -9,6 +9,7 @@ use proc_macro::{
 };
 use proc_macro_hack::proc_macro_hack;
 use std::iter::{self, FromIterator, Peekable};
+use std::panic;
 
 #[proc_macro]
 pub fn item(input: TokenStream) -> TokenStream {
@@ -412,7 +413,10 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
     }
 
     let pasted = evaluated.into_iter().collect::<String>();
-    let ident = TokenTree::Ident(Ident::new(&pasted, span));
+    let ident = match panic::catch_unwind(|| Ident::new(&pasted, span)) {
+        Ok(ident) => TokenTree::Ident(ident),
+        Err(_) => return Err(Error::new(span, "not a valid identifier")),
+    };
     let tokens = if is_lifetime {
         let apostrophe = TokenTree::Punct(Punct::new('\'', Spacing::Joint));
         vec![apostrophe, ident]

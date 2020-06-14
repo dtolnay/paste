@@ -1,9 +1,5 @@
-error: proc macro panicked
- --> $DIR/invalid-ident.rs:1:1
+error: not a valid identifier
+ --> $DIR/invalid-ident.rs:2:8
   |
-1 | / paste::item! {
-2 | |     fn [<0 f>]() {}
-3 | | }
-  | |_^
-  |
-  = help: message: `"0f"` is not a valid identifier
+2 |     fn [<0 f>]() {}
+  |        ^^^^^^^
