@@ -353,7 +353,12 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
             Segment::Env(var) => {
                 let resolved = match std::env::var(&var.value) {
                     Ok(resolved) => resolved,
-                    Err(_) => return Err(Error::new(var.span, "no such env var")),
+                    Err(_) => {
+                        return Err(Error::new(
+                            var.span,
+                            &format!("no such env var: {:?}", var.value),
+                        ));
+                    }
                 };
                 let resolved = resolved.replace('-', "_");
                 evaluated.push(resolved);
