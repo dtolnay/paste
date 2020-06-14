@@ -1,13 +1,14 @@
 extern crate proc_macro;
 
 mod enum_hack;
+mod error;
 
+use crate::error::{Error, Result};
 use proc_macro::{
     token_stream, Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree,
 };
 use proc_macro_hack::proc_macro_hack;
 use std::iter::{self, FromIterator, Peekable};
-use syn::{Error, Result};
 
 #[proc_macro]
 pub fn item(input: TokenStream) -> TokenStream {
@@ -37,7 +38,7 @@ fn expand_paste(input: TokenStream) -> TokenStream {
     let mut contains_paste = false;
     match expand(input, &mut contains_paste) {
         Ok(expanded) => expanded,
-        Err(err) => err.to_compile_error().into(),
+        Err(err) => err.to_compile_error(),
     }
 }
 
@@ -182,21 +183,21 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
 
     match tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '<' => {}
-        Some(wrong) => return Err(Error::new(wrong.span().into(), "expected `<`")),
-        None => return Err(Error::new(scope.into(), "expected `[< ... >]`")),
+        Some(wrong) => return Err(Error::new(wrong.span(), "expected `<`")),
+        None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
     let segments = parse_segments(&mut tokens, scope)?;
 
     match tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
-        Some(wrong) => return Err(Error::new(wrong.span().into(), "expected `>`")),
-        None => return Err(Error::new(scope.into(), "expected `[< ... >]`")),
+        Some(wrong) => return Err(Error::new(wrong.span(), "expected `>`")),
+        None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
     match tokens.next() {
         Some(unexpected) => Err(Error::new(
-            unexpected.span().into(),
+            unexpected.span(),
             "unexpected input, expected `[< ... >]`",
         )),
         None => Ok(segments),
@@ -232,18 +233,18 @@ fn parse_segments(
                         {
                             group
                         }
-                        Some(wrong) => return Err(Error::new(wrong.span().into(), "expected `(`")),
-                        None => return Err(Error::new(scope.into(), "expected `(` after `env!`")),
+                        Some(wrong) => return Err(Error::new(wrong.span(), "expected `(`")),
+                        None => return Err(Error::new(scope, "expected `(` after `env!`")),
                     };
                     let mut inner = parenthesized.stream().into_iter();
                     let lit = match inner.next() {
                         Some(TokenTree::Literal(lit)) => lit,
                         Some(wrong) => {
-                            return Err(Error::new(wrong.span().into(), "expected string literal"))
+                            return Err(Error::new(wrong.span(), "expected string literal"))
                         }
                         None => {
                             return Err(Error::new(
-                                parenthesized.span().into(),
+                                parenthesized.span(),
                                 "expected string literal in env! arg",
                             ))
                         }
@@ -260,10 +261,10 @@ fn parse_segments(
                             span: lit.span(),
                         }));
                     } else {
-                        return Err(Error::new(lit.span().into(), "expected string literal"));
+                        return Err(Error::new(lit.span(), "expected string literal"));
                     }
                     if let Some(unexpected) = inner.next() {
-                        return Err(Error::new(unexpected.span().into(), "unexpected token"));
+                        return Err(Error::new(unexpected.span(), "unexpected token"));
                     }
                 } else {
                     segments.push(Segment::String(fragment));
@@ -272,7 +273,7 @@ fn parse_segments(
             TokenTree::Literal(lit) => {
                 let mut lit_string = lit.to_string();
                 if lit_string.contains(&['#', '\\', '.', '+'][..]) {
-                    return Err(Error::new(lit.span().into(), "unsupported literal"));
+                    return Err(Error::new(lit.span(), "unsupported literal"));
                 }
                 lit_string = lit_string
                     .replace('"', "")
@@ -287,27 +288,23 @@ fn parse_segments(
                     let colon = Colon { span: punct.span() };
                     let ident = match tokens.next() {
                         Some(TokenTree::Ident(ident)) => ident,
-                        Some(wrong) => {
-                            return Err(Error::new(wrong.span().into(), "expected identifier"))
-                        }
-                        None => {
-                            return Err(Error::new(scope.into(), "expected identifier after `:`"))
-                        }
+                        Some(wrong) => return Err(Error::new(wrong.span(), "expected identifier")),
+                        None => return Err(Error::new(scope, "expected identifier after `:`")),
                     };
                     segments.push(Segment::Modifier(colon, ident));
                 }
-                _ => return Err(Error::new(punct.span().into(), "unexpected punct")),
+                _ => return Err(Error::new(punct.span(), "unexpected punct")),
             },
             TokenTree::Group(group) => {
                 if group.delimiter() == Delimiter::None {
                     let mut inner = group.stream().into_iter().peekable();
                     let nested = parse_segments(&mut inner, group.span())?;
                     if let Some(unexpected) = inner.next() {
-                        return Err(Error::new(unexpected.span().into(), "unexpected token"));
+                        return Err(Error::new(unexpected.span(), "unexpected token"));
                     }
                     segments.extend(nested);
                 } else {
-                    return Err(Error::new(group.span().into(), "unexpected token"));
+                    return Err(Error::new(group.span(), "unexpected token"));
                 }
             }
         }
@@ -326,34 +323,24 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
             }
             Segment::Apostrophe(span) => {
                 if is_lifetime {
-                    let span = proc_macro2::Span::from(*span);
-                    return Err(Error::new(span, "unexpected lifetime"));
+                    return Err(Error::new(*span, "unexpected lifetime"));
                 }
                 is_lifetime = true;
             }
             Segment::Env(var) => {
                 let resolved = match std::env::var(&var.value) {
                     Ok(resolved) => resolved,
-                    Err(_) => {
-                        let span = proc_macro2::Span::from(var.span);
-                        return Err(Error::new(span, "no such env var"));
-                    }
+                    Err(_) => return Err(Error::new(var.span, "no such env var")),
                 };
                 let resolved = resolved.replace('-', "_");
                 evaluated.push(resolved);
             }
             Segment::Modifier(colon, ident) => {
-                let span = proc_macro2::TokenStream::from(TokenStream::from_iter(vec![
-                    TokenTree::Punct({
-                        let mut punct = Punct::new(':', Spacing::Alone);
-                        punct.set_span(colon.span);
-                        punct
-                    }),
-                    TokenTree::Ident(ident.clone()),
-                ]));
                 let last = match evaluated.pop() {
                     Some(last) => last,
-                    None => return Err(Error::new_spanned(span, "unexpected modifier")),
+                    None => {
+                        return Err(Error::new2(colon.span, ident.span(), "unexpected modifier"))
+                    }
                 };
                 match ident.to_string().as_str() {
                     "lower" => {
@@ -396,7 +383,11 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
                         evaluated.push(acc);
                     }
                     _ => {
-                        return Err(Error::new_spanned(span, "unsupported modifier"));
+                        return Err(Error::new2(
+                            colon.span,
+                            ident.span(),
+                            "unsupported modifier",
+                        ));
                     }
                 }
             }
