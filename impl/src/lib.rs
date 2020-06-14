@@ -309,10 +309,10 @@ fn parse_segments(
                     let colon = Colon { span: punct.span() };
                     let ident = match tokens.next() {
                         Some(TokenTree::Ident(ident)) => ident,
-                        Some(wrong) => {
-                            return Err(Error::new(wrong.span(), "expected identifier after `:`"));
+                        wrong => {
+                            let span = wrong.as_ref().map_or(scope, TokenTree::span);
+                            return Err(Error::new(span, "expected identifier after `:`"));
                         }
-                        None => return Err(Error::new(scope, "expected identifier after `:`")),
                     };
                     segments.push(Segment::Modifier(colon, ident));
                 }
