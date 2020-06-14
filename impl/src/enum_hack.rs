@@ -1,22 +1,60 @@
-use proc_macro::{TokenStream, TokenTree};
-use quote::quote;
+use proc_macro::{Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
+use std::iter::FromIterator;
 
-pub fn wrap(output: proc_macro2::TokenStream) -> proc_macro2::TokenStream {
+pub fn wrap(output: TokenStream) -> TokenStream {
     let mut hasher = DefaultHasher::default();
     output.to_string().hash(&mut hasher);
     let mangled_name = format!("_paste_{}", hasher.finish());
-    let ident = proc_macro2::Ident::new(&mangled_name, proc_macro2::Span::call_site());
+    let ident = Ident::new(&mangled_name, Span::call_site());
 
-    quote! {
-        #[derive(paste::EnumHack)]
-        enum #ident {
-            Value = (stringify! {
-                #output
-            }, 0).1,
-        }
-    }
+    // #[derive(paste::EnumHack)]
+    // enum #ident {
+    //     Value = (stringify! {
+    //         #output
+    //     }, 0).1,
+    // }
+    TokenStream::from_iter(vec![
+        TokenTree::Punct(Punct::new('#', Spacing::Alone)),
+        TokenTree::Group(Group::new(
+            Delimiter::Bracket,
+            TokenStream::from_iter(vec![
+                TokenTree::Ident(Ident::new("derive", Span::call_site())),
+                TokenTree::Group(Group::new(
+                    Delimiter::Parenthesis,
+                    TokenStream::from_iter(vec![
+                        TokenTree::Ident(Ident::new("paste", Span::call_site())),
+                        TokenTree::Punct(Punct::new(':', Spacing::Joint)),
+                        TokenTree::Punct(Punct::new(':', Spacing::Alone)),
+                        TokenTree::Ident(Ident::new("EnumHack", Span::call_site())),
+                    ]),
+                )),
+            ]),
+        )),
+        TokenTree::Ident(Ident::new("enum", Span::call_site())),
+        TokenTree::Ident(ident),
+        TokenTree::Group(Group::new(
+            Delimiter::Brace,
+            TokenStream::from_iter(vec![
+                TokenTree::Ident(Ident::new("Value", Span::call_site())),
+                TokenTree::Punct(Punct::new('=', Spacing::Alone)),
+                TokenTree::Group(Group::new(
+                    Delimiter::Parenthesis,
+                    TokenStream::from_iter(vec![
+                        TokenTree::Ident(Ident::new("stringify", Span::call_site())),
+                        TokenTree::Punct(Punct::new('!', Spacing::Alone)),
+                        TokenTree::Group(Group::new(Delimiter::Brace, output)),
+                        TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+                        TokenTree::Literal(Literal::usize_unsuffixed(0)),
+                    ]),
+                )),
+                TokenTree::Punct(Punct::new('.', Spacing::Alone)),
+                TokenTree::Literal(Literal::usize_unsuffixed(1)),
+                TokenTree::Punct(Punct::new(',', Spacing::Alone)),
+            ]),
+        )),
+    ])
 }
 
 pub fn extract(input: TokenStream) -> TokenStream {

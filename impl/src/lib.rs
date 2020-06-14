@@ -18,7 +18,7 @@ pub fn item(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 #[proc_macro]
 pub fn item_with_macros(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let input = parse_macro_input!(input as PasteInput);
-    proc_macro::TokenStream::from(enum_hack::wrap(input.expanded))
+    enum_hack::wrap(proc_macro::TokenStream::from(input.expanded))
 }
 
 #[proc_macro_hack]
