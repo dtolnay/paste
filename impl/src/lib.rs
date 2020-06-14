@@ -181,7 +181,7 @@ fn is_paste_operation(input: &TokenStream) -> bool {
 fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segment>> {
     let mut tokens = input.into_iter().peekable();
 
-    match tokens.next() {
+    match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '<' => {}
         Some(wrong) => return Err(Error::new(wrong.span(), "expected `<`")),
         None => return Err(Error::new(scope, "expected `[< ... >]`")),
@@ -189,7 +189,7 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
 
     let segments = parse_segments(&mut tokens, scope)?;
 
-    match tokens.next() {
+    match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
         Some(wrong) => return Err(Error::new(wrong.span(), "expected `>`")),
         None => return Err(Error::new(scope, "expected `[< ... >]`")),
@@ -227,7 +227,8 @@ fn parse_segments(
                     }
                 {
                     tokens.next().unwrap(); // `!`
-                    let parenthesized = match tokens.next() {
+                    let expect_group = tokens.next();
+                    let parenthesized = match &expect_group {
                         Some(TokenTree::Group(group))
                             if group.delimiter() == Delimiter::Parenthesis =>
                         {
