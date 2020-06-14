@@ -263,7 +263,7 @@ fn parse_segments(
                             return Err(Error::new2(
                                 ident.span(),
                                 parenthesized.span(),
-                                "expected string literal in env! arg",
+                                "expected string literal as argument to env! macro",
                             ))
                         }
                     };
