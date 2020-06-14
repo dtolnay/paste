@@ -1,8 +1,7 @@
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hash, Hasher};
-
 use proc_macro2::{Ident, Span, TokenStream, TokenTree};
 use quote::quote;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{braced, parenthesized, parse_macro_input, Token};
 
