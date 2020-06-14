@@ -282,7 +282,10 @@ fn parse_segments(
                         return Err(Error::new(lit.span(), "expected string literal"));
                     }
                     if let Some(unexpected) = inner.next() {
-                        return Err(Error::new(unexpected.span(), "unexpected token"));
+                        return Err(Error::new(
+                            unexpected.span(),
+                            "unexpected token in env! macro",
+                        ));
                     }
                 } else {
                     segments.push(Segment::String(fragment));
