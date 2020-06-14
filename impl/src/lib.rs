@@ -243,7 +243,8 @@ fn parse_segments(
                             return Err(Error::new(wrong.span(), "expected string literal"))
                         }
                         None => {
-                            return Err(Error::new(
+                            return Err(Error::new2(
+                                ident.span(),
                                 parenthesized.span(),
                                 "expected string literal in env! arg",
                             ))
