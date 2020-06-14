@@ -6,16 +6,20 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub struct Error {
     begin: Span,
     end: Span,
-    msg: &'static str,
+    msg: String,
 }
 
 impl Error {
-    pub fn new(span: Span, msg: &'static str) -> Self {
+    pub fn new(span: Span, msg: &str) -> Self {
         Self::new2(span, span, msg)
     }
 
-    pub fn new2(begin: Span, end: Span, msg: &'static str) -> Self {
-        Error { begin, end, msg }
+    pub fn new2(begin: Span, end: Span, msg: &str) -> Self {
+        Error {
+            begin,
+            end,
+            msg: msg.to_owned(),
+        }
     }
 
     pub fn to_compile_error(&self) -> TokenStream {
@@ -30,7 +34,7 @@ impl Error {
             TokenTree::Group({
                 let mut group = Group::new(Delimiter::Brace, {
                     TokenStream::from_iter(vec![TokenTree::Literal({
-                        let mut string = Literal::string(self.msg);
+                        let mut string = Literal::string(&self.msg);
                         string.set_span(self.end);
                         string
                     })])

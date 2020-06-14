@@ -1,4 +1,4 @@
-error: not a valid identifier
+error: `"0f"` is not a valid identifier
  --> $DIR/invalid-ident.rs:2:8
   |
 2 |     fn [<0 f>]() {}

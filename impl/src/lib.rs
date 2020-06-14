@@ -415,7 +415,12 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
     let pasted = evaluated.into_iter().collect::<String>();
     let ident = match panic::catch_unwind(|| Ident::new(&pasted, span)) {
         Ok(ident) => TokenTree::Ident(ident),
-        Err(_) => return Err(Error::new(span, "not a valid identifier")),
+        Err(_) => {
+            return Err(Error::new(
+                span,
+                &format!("`{:?}` is not a valid identifier", pasted),
+            ));
+        }
     };
     let tokens = if is_lifetime {
         let apostrophe = TokenTree::Punct(Punct::new('\'', Spacing::Joint));
