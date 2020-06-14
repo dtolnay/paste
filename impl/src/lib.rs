@@ -67,7 +67,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 let content = group.stream();
                 let span = group.span();
                 if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
-                    let segments = parse_bracket_as_segments(content, span).unwrap();
+                    let segments = parse_bracket_as_segments(content, span)?;
                     let pasted = paste_segments(span, &segments)?;
                     expanded.extend(pasted);
                     *contains_paste = true;
@@ -174,28 +174,49 @@ enum Segment {
 }
 
 fn is_paste_operation(input: &TokenStream) -> bool {
+    let mut tokens = input.clone().into_iter().peekable();
+
+    match &tokens.next() {
+        Some(TokenTree::Punct(punct)) if punct.as_char() == '<' => {}
+        _ => return false,
+    }
+
     let scope = Span::call_site();
-    parse_bracket_as_segments(input.clone(), scope).is_some()
+    if parse_segments(&mut tokens, scope).is_err() {
+        return false;
+    }
+
+    match &tokens.next() {
+        Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
+        _ => return false,
+    }
+
+    tokens.next().is_none()
 }
 
-fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Option<Vec<Segment>> {
+fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segment>> {
     let mut tokens = input.into_iter().peekable();
 
     match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '<' => {}
-        _ => return None,
+        Some(wrong) => return Err(Error::new(wrong.span(), "expected `<`")),
+        None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
-    let segments = parse_segments(&mut tokens, scope).ok()?;
+    let segments = parse_segments(&mut tokens, scope)?;
 
     match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
-        _ => return None,
+        Some(wrong) => return Err(Error::new(wrong.span(), "expected `>`")),
+        None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
     match tokens.next() {
-        Some(_) => None,
-        None => Some(segments),
+        Some(unexpected) => Err(Error::new(
+            unexpected.span(),
+            "unexpected input, expected `[< ... >]`",
+        )),
+        None => Ok(segments),
     }
 }
 
