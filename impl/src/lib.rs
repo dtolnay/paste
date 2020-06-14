@@ -174,24 +174,23 @@ enum Segment {
 }
 
 fn is_paste_operation(input: &TokenStream) -> bool {
-    let mut tokens = input.clone().into_iter().peekable();
+    let mut tokens = input.clone().into_iter();
 
     match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '<' => {}
         _ => return false,
     }
 
-    let scope = Span::call_site();
-    if parse_segments(&mut tokens, scope).is_err() {
-        return false;
+    let mut has_token = false;
+    loop {
+        match &tokens.next() {
+            Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {
+                return has_token && tokens.next().is_none();
+            }
+            Some(_) => has_token = true,
+            None => return false,
+        }
     }
-
-    match &tokens.next() {
-        Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
-        _ => return false,
-    }
-
-    tokens.next().is_none()
 }
 
 fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segment>> {
