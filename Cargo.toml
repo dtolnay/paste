@@ -1,6 +1,6 @@
 [package]
 name = "paste"
-version = "0.1.16"
+version = "0.1.17"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
@@ -9,7 +9,7 @@ repository = "https://github.com/dtolnay/paste"
 readme = "README.md"
 
 [dependencies]
-paste-impl = { version = "=0.1.16", path = "impl" }
+paste-impl = { version = "=0.1.17", path = "impl" }
 proc-macro-hack = "0.5.9"
 
 [dev-dependencies]
