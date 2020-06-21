@@ -48,10 +48,11 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
     let (mut prev_colon, mut colon) = (false, false);
     let mut prev_none_group = None::<Group>;
     let mut tokens = input.into_iter().peekable();
-    while let Some(token) = tokens.next() {
+    loop {
+        let token = tokens.next();
         if let Some(group) = prev_none_group.take() {
             if match (&token, tokens.peek()) {
-                (TokenTree::Punct(fst), Some(TokenTree::Punct(snd))) => {
+                (Some(TokenTree::Punct(fst)), Some(TokenTree::Punct(snd))) => {
                     fst.as_char() == ':' && snd.as_char() == ':' && fst.spacing() == Spacing::Joint
                 }
                 _ => false,
@@ -63,7 +64,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
             }
         }
         match token {
-            TokenTree::Group(group) => {
+            Some(TokenTree::Group(group)) => {
                 let delimiter = group.delimiter();
                 let content = group.stream();
                 let span = group.span();
@@ -98,7 +99,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 prev_colon = false;
                 colon = false;
             }
-            other => {
+            Some(other) => {
                 match &other {
                     TokenTree::Punct(punct) if punct.as_char() == ':' => {
                         prev_colon = colon;
@@ -111,9 +112,9 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 }
                 expanded.extend(iter::once(other));
             }
+            None => return Ok(expanded),
         }
     }
-    Ok(expanded)
 }
 
 // https://github.com/dtolnay/paste/issues/26

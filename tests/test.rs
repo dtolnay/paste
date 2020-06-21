@@ -373,6 +373,29 @@ mod test_type_in_path {
     }
 }
 
+mod test_type_in_fn_arg {
+    // https://github.com/dtolnay/paste/issues/38
+
+    fn _jit_address(_node: ()) {}
+
+    macro_rules! jit_reexport {
+        ($fn:ident, $arg:ident : $typ:ty) => {
+            paste::item! {
+                pub fn $fn($arg: $typ) {
+                    [<_jit_ $fn>]($arg);
+                }
+            }
+        };
+    }
+
+    jit_reexport!(address, node: ());
+
+    #[test]
+    fn test_type_in_fn_arg() {
+        let _ = address;
+    }
+}
+
 mod test_pat_in_expr_position {
     // https://github.com/xiph/rav1e/pull/2324/files
 
