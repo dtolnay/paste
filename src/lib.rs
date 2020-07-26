@@ -149,6 +149,3 @@ pub use paste_impl::expr;
 /// An item is like a struct definition, function, impl block, or anything else
 /// that can appear at the top level of a module scope.
 pub use paste_impl::item;
-
-#[doc(hidden)]
-pub use paste_impl::EnumHack;

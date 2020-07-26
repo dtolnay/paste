@@ -1,6 +1,5 @@
 extern crate proc_macro;
 
-mod enum_hack;
 mod error;
 
 use crate::error::{Error, Result};
@@ -22,12 +21,6 @@ pub fn expr(input: TokenStream) -> TokenStream {
         Delimiter::Brace,
         expand_paste(input),
     )))
-}
-
-#[doc(hidden)]
-#[proc_macro_derive(EnumHack)]
-pub fn enum_hack(input: TokenStream) -> TokenStream {
-    enum_hack::extract(input)
 }
 
 fn expand_paste(input: TokenStream) -> TokenStream {
