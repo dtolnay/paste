@@ -146,6 +146,7 @@ use proc_macro::{
 };
 use std::iter::{self, FromIterator, Peekable};
 use std::panic;
+use std::str::FromStr;
 
 #[proc_macro]
 pub fn paste(input: TokenStream) -> TokenStream {
@@ -205,7 +206,11 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     && matches!(lookbehind, Lookbehind::Pound | Lookbehind::PoundBang)
                     && is_pasted_doc(&content)
                 {
-                    unimplemented!()
+                    let pasted = do_paste_doc(&content, span);
+                    let mut group = Group::new(delimiter, pasted);
+                    group.set_span(span);
+                    expanded.extend(iter::once(TokenTree::Group(group)));
+                    *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
                     let nested = expand(content, &mut group_contains_paste)?;
@@ -355,6 +360,28 @@ fn escaped_string_value(token: &TokenTree) -> Option<String> {
         }
         TokenTree::Punct(_) => None,
     }
+}
+
+fn do_paste_doc(attr: &TokenStream, span: Span) -> TokenStream {
+    let mut expanded = TokenStream::new();
+    let mut tokens = attr.clone().into_iter();
+    expanded.extend(tokens.by_ref().take(2)); // `doc =`
+
+    let mut lit = String::new();
+    lit.push('"');
+    for token in tokens {
+        lit += &escaped_string_value(&token).unwrap();
+    }
+    lit.push('"');
+
+    let mut lit = TokenStream::from_str(&lit)
+        .unwrap()
+        .into_iter()
+        .next()
+        .unwrap();
+    lit.set_span(span);
+    expanded.extend(iter::once(lit));
+    expanded
 }
 
 struct LitStr {
