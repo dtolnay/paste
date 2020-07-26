@@ -8,15 +8,12 @@ description = "Macros for all your token pasting needs"
 repository = "https://github.com/dtolnay/paste"
 readme = "README.md"
 
-[dependencies]
-paste-impl = { version = "=0.1.18", path = "impl" }
+[lib]
+proc-macro = true
 
 [dev-dependencies]
 rustversion = "1.0"
 trybuild = "1.0"
-
-[workspace]
-members = ["impl"]
 
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
