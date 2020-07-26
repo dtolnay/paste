@@ -201,6 +201,11 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 } else if delimiter == Delimiter::None && is_flat_group(&content) {
                     expanded.extend(content);
                     *contains_paste = true;
+                } else if delimiter == Delimiter::Bracket
+                    && matches!(lookbehind, Lookbehind::Pound | Lookbehind::PoundBang)
+                    && is_pasted_doc(&content)
+                {
+                    unimplemented!()
                 } else {
                     let mut group_contains_paste = false;
                     let nested = expand(content, &mut group_contains_paste)?;
@@ -287,6 +292,47 @@ fn is_flat_group(input: &TokenStream) -> bool {
     }
 
     state == State::Ident || state == State::Literal || state == State::Lifetime
+}
+
+fn is_pasted_doc(input: &TokenStream) -> bool {
+    #[derive(PartialEq)]
+    enum State {
+        Init,
+        Doc,
+        Equal,
+        First,
+        Rest,
+    }
+
+    fn is_stringlike(tt: &TokenTree) -> bool {
+        match tt {
+            TokenTree::Ident(_) => true,
+            TokenTree::Literal(literal) => {
+                let repr = literal.to_string();
+                !repr.starts_with('b') && !repr.starts_with('\'')
+            }
+            TokenTree::Group(group) => {
+                let mut inner = group.stream().into_iter();
+                group.delimiter() == Delimiter::None
+                    && matches!(inner.next(), Some(inner) if is_stringlike(&inner))
+                    && inner.next().is_none()
+            }
+            TokenTree::Punct(_) => false,
+        }
+    }
+
+    let mut state = State::Init;
+    for tt in input.clone() {
+        state = match (state, &tt) {
+            (State::Init, TokenTree::Ident(ident)) if ident.to_string() == "doc" => State::Doc,
+            (State::Doc, TokenTree::Punct(punct)) if punct.as_char() == '=' => State::Equal,
+            (State::Equal, tt) if is_stringlike(tt) => State::First,
+            (State::First, tt) | (State::Rest, tt) if is_stringlike(tt) => State::Rest,
+            _ => return false,
+        };
+    }
+
+    state == State::Rest
 }
 
 struct LitStr {
