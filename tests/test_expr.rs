@@ -199,3 +199,38 @@ mod test_x86_feature_literal {
 
     my_is_x86_feature_detected!("mmx");
 }
+
+mod test_local_setter {
+    // https://github.com/dtolnay/paste/issues/7
+
+    use paste::paste;
+
+    #[derive(Default)]
+    struct Test {
+        val: i32,
+    }
+
+    impl Test {
+        fn set_val(&mut self, arg: i32) {
+            self.val = arg;
+        }
+    }
+
+    macro_rules! setter {
+        ($obj:expr, $field:ident, $value:expr) => {
+            paste! { $obj.[<set_ $field>]($value); }
+        };
+
+        ($field:ident, $value:expr) => {{
+            let mut new = Test::default();
+            setter!(new, val, $value);
+            new
+        }};
+    }
+
+    #[test]
+    fn test_local_setter() {
+        let a = setter!(val, 42);
+        assert_eq!(a.val, 42);
+    }
+}
