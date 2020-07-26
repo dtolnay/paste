@@ -135,8 +135,6 @@
 //! [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
 //! [`str::to_uppercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_uppercase
 
-extern crate proc_macro;
-
 mod error;
 
 use crate::error::{Error, Result};
