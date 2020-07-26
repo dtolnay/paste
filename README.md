@@ -20,7 +20,7 @@ including using pasted identifiers to define new items.
 paste = "0.1"
 ```
 
-This approach works with any Rust compiler 1.45+.
+This approach works with any Rust compiler 1.31+.
 
 <br>
 
