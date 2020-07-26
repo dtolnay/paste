@@ -196,7 +196,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     let pasted = paste_segments(span, &segments)?;
                     expanded.extend(pasted);
                     *contains_paste = true;
-                } else if is_none_delimited_flat_group(delimiter, &content) {
+                } else if delimiter == Delimiter::None && is_flat_group(&content) {
                     expanded.extend(content);
                     *contains_paste = true;
                 } else {
@@ -241,11 +241,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
 }
 
 // https://github.com/dtolnay/paste/issues/26
-fn is_none_delimited_flat_group(delimiter: Delimiter, input: &TokenStream) -> bool {
-    if delimiter != Delimiter::None {
-        return false;
-    }
-
+fn is_flat_group(input: &TokenStream) -> bool {
     #[derive(PartialEq)]
     enum State {
         Init,
