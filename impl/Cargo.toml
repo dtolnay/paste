@@ -10,8 +10,5 @@ repository = "https://github.com/dtolnay/paste"
 [lib]
 proc-macro = true
 
-[dependencies]
-proc-macro-hack = "0.5"
-
 [package.metadata.docs.rs]
 targets = ["x86_64-unknown-linux-gnu"]
