@@ -16,11 +16,6 @@ pub fn item(input: TokenStream) -> TokenStream {
     expand_paste(input)
 }
 
-#[proc_macro]
-pub fn item_with_macros(input: TokenStream) -> TokenStream {
-    enum_hack::wrap(expand_paste(input))
-}
-
 #[proc_macro_hack]
 pub fn expr(input: TokenStream) -> TokenStream {
     TokenStream::from(TokenTree::Group(Group::new(
