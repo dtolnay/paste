@@ -223,19 +223,17 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 }
                 lookbehind = Lookbehind::Other;
             }
-            Some(other) => {
-                lookbehind = match &other {
-                    TokenTree::Punct(punct) if punct.as_char() == ':' => {
-                        if lookbehind == Lookbehind::JointColon {
-                            Lookbehind::DoubleColon
-                        } else if punct.spacing() == Spacing::Joint {
-                            Lookbehind::JointColon
-                        } else {
-                            Lookbehind::Other
-                        }
-                    }
+            Some(TokenTree::Punct(punct)) => {
+                lookbehind = match punct.as_char() {
+                    ':' if lookbehind == Lookbehind::JointColon => Lookbehind::DoubleColon,
+                    ':' if punct.spacing() == Spacing::Joint => Lookbehind::JointColon,
+                    '#' => Lookbehind::Pound,
                     _ => Lookbehind::Other,
                 };
+                expanded.extend(iter::once(TokenTree::Punct(punct)));
+            }
+            Some(other) => {
+                lookbehind = Lookbehind::Other;
                 expanded.extend(iter::once(other));
             }
             None => return Ok(expanded),
@@ -247,6 +245,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
 enum Lookbehind {
     JointColon,
     DoubleColon,
+    Pound,
     Other,
 }
 
