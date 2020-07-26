@@ -224,18 +224,18 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 lookbehind = Lookbehind::Other;
             }
             Some(other) => {
-                match &other {
+                lookbehind = match &other {
                     TokenTree::Punct(punct) if punct.as_char() == ':' => {
-                        lookbehind = if lookbehind == Lookbehind::JointColon {
+                        if lookbehind == Lookbehind::JointColon {
                             Lookbehind::DoubleColon
                         } else if punct.spacing() == Spacing::Joint {
                             Lookbehind::JointColon
                         } else {
                             Lookbehind::Other
-                        };
+                        }
                     }
-                    _ => lookbehind = Lookbehind::Other,
-                }
+                    _ => Lookbehind::Other,
+                };
                 expanded.extend(iter::once(other));
             }
             None => return Ok(expanded),
