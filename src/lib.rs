@@ -137,10 +137,7 @@
 
 #![no_std]
 
-use proc_macro_hack::proc_macro_hack;
-
 /// Paste identifiers within a macro invocation that expands to an expression.
-#[proc_macro_hack]
 pub use paste_impl::expr;
 
 /// Paste identifiers within a macro invocation that expands to one or more

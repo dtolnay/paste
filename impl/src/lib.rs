@@ -6,7 +6,6 @@ use crate::error::{Error, Result};
 use proc_macro::{
     token_stream, Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree,
 };
-use proc_macro_hack::proc_macro_hack;
 use std::iter::{self, FromIterator, Peekable};
 use std::panic;
 
@@ -15,7 +14,7 @@ pub fn item(input: TokenStream) -> TokenStream {
     expand_paste(input)
 }
 
-#[proc_macro_hack]
+#[proc_macro]
 pub fn expr(input: TokenStream) -> TokenStream {
     TokenStream::from(TokenTree::Group(Group::new(
         Delimiter::Brace,
