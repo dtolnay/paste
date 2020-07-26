@@ -168,7 +168,7 @@ pub fn expr(input: TokenStream) -> TokenStream {
 
 fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> {
     let mut expanded = TokenStream::new();
-    let (mut prev_colon, mut colon) = (false, false);
+    let mut lookbehind = Lookbehind::Other;
     let mut prev_none_group = None::<Group>;
     let mut tokens = input.into_iter().peekable();
     loop {
@@ -212,32 +212,40 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     };
                     if delimiter != Delimiter::None {
                         expanded.extend(iter::once(TokenTree::Group(group)));
-                    } else if prev_colon {
+                    } else if lookbehind == Lookbehind::DoubleColon {
                         expanded.extend(group.stream());
                         *contains_paste = true;
                     } else {
                         prev_none_group = Some(group);
                     }
                 }
-                prev_colon = false;
-                colon = false;
+                lookbehind = Lookbehind::Other;
             }
             Some(other) => {
                 match &other {
                     TokenTree::Punct(punct) if punct.as_char() == ':' => {
-                        prev_colon = colon;
-                        colon = punct.spacing() == Spacing::Joint;
+                        if lookbehind == Lookbehind::JointColon {
+                            lookbehind = Lookbehind::DoubleColon;
+                        } else if punct.spacing() == Spacing::Joint {
+                            lookbehind = Lookbehind::JointColon;
+                        } else {
+                            lookbehind = Lookbehind::Other;
+                        }
                     }
-                    _ => {
-                        prev_colon = false;
-                        colon = false;
-                    }
+                    _ => lookbehind = Lookbehind::Other,
                 }
                 expanded.extend(iter::once(other));
             }
             None => return Ok(expanded),
         }
     }
+}
+
+#[derive(PartialEq)]
+enum Lookbehind {
+    JointColon,
+    DoubleColon,
+    Other,
 }
 
 // https://github.com/dtolnay/paste/issues/26
