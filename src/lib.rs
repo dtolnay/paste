@@ -304,23 +304,6 @@ fn is_pasted_doc(input: &TokenStream) -> bool {
         Rest,
     }
 
-    fn is_stringlike(tt: &TokenTree) -> bool {
-        match tt {
-            TokenTree::Ident(_) => true,
-            TokenTree::Literal(literal) => {
-                let repr = literal.to_string();
-                !repr.starts_with('b') && !repr.starts_with('\'')
-            }
-            TokenTree::Group(group) => {
-                let mut inner = group.stream().into_iter();
-                group.delimiter() == Delimiter::None
-                    && matches!(inner.next(), Some(inner) if is_stringlike(&inner))
-                    && inner.next().is_none()
-            }
-            TokenTree::Punct(_) => false,
-        }
-    }
-
     let mut state = State::Init;
     for tt in input.clone() {
         state = match (state, &tt) {
@@ -333,6 +316,45 @@ fn is_pasted_doc(input: &TokenStream) -> bool {
     }
 
     state == State::Rest
+}
+
+fn is_stringlike(token: &TokenTree) -> bool {
+    escaped_string_value(token).is_some()
+}
+
+fn escaped_string_value(token: &TokenTree) -> Option<String> {
+    match token {
+        TokenTree::Ident(ident) => Some(ident.to_string()),
+        TokenTree::Literal(literal) => {
+            let mut repr = literal.to_string();
+            if repr.starts_with('b') || repr.starts_with('\'') {
+                None
+            } else if repr.starts_with('"') {
+                repr.truncate(repr.len() - 1);
+                repr.remove(0);
+                Some(repr)
+            } else if repr.starts_with('r') {
+                let begin = repr.find('"').unwrap() + 1;
+                let end = repr.rfind('"').unwrap();
+                Some(repr[begin..end].escape_default().to_string())
+            } else {
+                Some(repr)
+            }
+        }
+        TokenTree::Group(group) => {
+            if group.delimiter() != Delimiter::None {
+                return None;
+            }
+            let mut inner = group.stream().into_iter();
+            let first = inner.next()?;
+            if inner.next().is_none() {
+                escaped_string_value(&first)
+            } else {
+                None
+            }
+        }
+        TokenTree::Punct(_) => None,
+    }
 }
 
 struct LitStr {
