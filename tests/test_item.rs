@@ -1,5 +1,3 @@
-use paste::paste;
-
 mod test_basic {
     use paste::paste;
 
@@ -31,140 +29,6 @@ mod test_in_impl {
     #[test]
     fn test() {
         Struct::abc();
-    }
-}
-
-#[test]
-fn test_shared_hygiene() {
-    paste! {
-        let [<a a>] = 1;
-        assert_eq!([<a a>], 1);
-    }
-}
-
-#[test]
-fn test_repeat() {
-    const ROCKET_A: &'static str = "/a";
-    const ROCKET_B: &'static str = "/b";
-
-    macro_rules! routes {
-        ($($route:ident),*) => {{
-            paste! {
-                vec![$( [<ROCKET_ $route>] ),*]
-            }
-        }}
-    }
-
-    let routes = routes!(A, B);
-    assert_eq!(routes, vec!["/a", "/b"]);
-}
-
-#[test]
-fn test_integer() {
-    const CONST0: &'static str = "const0";
-
-    let pasted = paste!([<CONST 0>]);
-    assert_eq!(pasted, CONST0);
-}
-
-#[test]
-fn test_underscore() {
-    paste! {
-        const A_B: usize = 0;
-        assert_eq!([<A _ B>], 0);
-    }
-}
-
-#[test]
-fn test_lifetime() {
-    paste! {
-        #[allow(dead_code)]
-        struct S<[<'d e>]> {
-            q: &[<'d e>] str,
-        }
-    }
-}
-
-#[test]
-fn test_keyword() {
-    paste! {
-        struct [<F move>];
-
-        let _ = Fmove;
-    }
-}
-
-#[test]
-fn test_literal_str() {
-    paste! {
-        #[allow(non_camel_case_types)]
-        struct [<Foo "Bar-Baz">];
-
-        let _ = FooBar_Baz;
-    }
-}
-
-#[test]
-fn test_env_literal() {
-    paste! {
-        struct [<Lib env bar>];
-
-        let _ = Libenvbar;
-    }
-}
-
-#[test]
-fn test_env_present() {
-    paste! {
-        struct [<Lib env!("CARGO_PKG_NAME")>];
-
-        let _ = Libpaste;
-    }
-}
-
-#[test]
-fn test_raw_identifier() {
-    paste! {
-        struct [<F r#move>];
-
-        let _ = Fmove;
-    }
-}
-
-#[test]
-fn test_false_start() {
-    trait Trait {
-        fn f() -> usize;
-    }
-
-    struct S;
-
-    impl Trait for S {
-        fn f() -> usize {
-            0
-        }
-    }
-
-    paste! {
-        let x = [<S as Trait>::f()];
-        assert_eq!(x[0], 0);
-    }
-}
-
-#[test]
-fn test_local_variable() {
-    let yy = 0;
-
-    paste! {
-        assert_eq!([<y y>], 0);
-    }
-}
-
-#[test]
-fn test_empty() {
-    paste! {
-        assert_eq!(stringify!([<y y>]), "yy");
-        assert_eq!(stringify!([<>]).replace(' ', ""), "[<>]");
     }
 }
 
@@ -232,15 +96,6 @@ mod test_to_lower {
     }
 }
 
-#[test]
-fn test_env_to_lower() {
-    paste! {
-        struct [<Lib env!("CARGO_PKG_NAME"):lower>];
-
-        let _ = Libpaste;
-    }
-}
-
 mod test_to_upper {
     use paste::paste;
 
@@ -257,15 +112,6 @@ mod test_to_upper {
     #[test]
     fn test_to_upper() {
         assert_eq!(MY_TEST_HERE, "TEST");
-    }
-}
-
-#[test]
-fn test_env_to_upper() {
-    paste! {
-        const [<LIB env!("CARGO_PKG_NAME"):upper>]: &str = "libpaste";
-
-        let _ = LIBPASTE;
     }
 }
 
@@ -292,15 +138,6 @@ mod test_to_snake {
     }
 }
 
-#[test]
-fn test_env_to_snake() {
-    paste! {
-        const [<LIB env!("CARGO_PKG_NAME"):snake:upper>]: &str = "libpaste";
-
-        let _ = LIBPASTE;
-    }
-}
-
 mod test_to_camel {
     use paste::paste;
 
@@ -321,16 +158,6 @@ mod test_to_camel {
         assert_eq!(DEFAULT_CAMEL, "ThisIsButATest");
         assert_eq!(LOWER_CAMEL, "thisisbutatest");
         assert_eq!(UPPER_CAMEL, "THISISBUTATEST");
-    }
-}
-
-#[test]
-fn test_env_to_camel() {
-    paste! {
-        #[allow(non_upper_case_globals)]
-        const [<LIB env!("CARGO_PKG_NAME"):camel>]: &str = "libpaste";
-
-        let _ = LIBPaste;
     }
 }
 
@@ -439,33 +266,4 @@ mod test_pat_in_expr_position {
     }
 
     rav1e_bad!(std::fmt::Error);
-}
-
-mod test_x86_feature_literal {
-    // work around https://github.com/rust-lang/rust/issues/72726
-
-    use paste::paste;
-
-    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
-    macro_rules! my_is_x86_feature_detected {
-        ($feat:literal) => {
-            paste! {
-                #[test]
-                fn test() {
-                    let _ = is_x86_feature_detected!($feat);
-                }
-            }
-        };
-    }
-
-    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
-    macro_rules! my_is_x86_feature_detected {
-        ($feat:literal) => {
-            #[ignore]
-            #[test]
-            fn test() {}
-        };
-    }
-
-    my_is_x86_feature_detected!("mmx");
 }
