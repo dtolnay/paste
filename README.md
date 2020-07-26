@@ -47,34 +47,11 @@ fn main() {
 
 <br>
 
-## More elaborate examples
-
-This program demonstrates how you may want to bundle a paste invocation inside
-of a more convenient user-facing macro of your own. Here the `routes!(A, B)`
-macro expands to a vector containing `ROUTE_A` and `ROUTE_B`.
-
-```rust
-use paste::paste;
-
-const ROUTE_A: &str = "/a";
-const ROUTE_B: &str = "/b";
-
-macro_rules! routes {
-    ($($route:ident),*) => {{
-        paste! {
-            vec![$( [<ROUTE_ $route>] ),*]
-        }
-    }}
-}
-
-fn main() {
-    let routes = routes!(A, B);
-    assert_eq!(routes, vec!["/a", "/b"]);
-}
-```
+## More elaborate example
 
 The next example shows a macro that generates accessor methods for some struct
-fields.
+fields. It demonstrates how you might find it useful to bundle a paste
+invocation inside of a macro\_rules macro.
 
 ```rust
 use paste::paste;
