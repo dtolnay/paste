@@ -21,23 +21,20 @@
 //!
 //! # Pasting identifiers
 //!
-//! There are two entry points, `paste::expr!` for macros in expression position and
-//! `paste::item!` for macros in item position.
-//!
-//! Within either one, identifiers inside `[<`...`>]` are pasted together to form a
-//! single identifier.
+//! Within the `paste!` macro, identifiers inside `[<`...`>]` are pasted
+//! together to form a single identifier.
 //!
 //! ```
-//! // Macro in item position: at module scope or inside of an impl block.
-//! paste::item! {
+//! use paste::paste;
+//!
+//! paste! {
 //!     // Defines a const called `QRST`.
 //!     const [<Q R S T>]: &str = "success!";
 //! }
 //!
 //! fn main() {
-//!     // Macro in expression position: inside a function body.
 //!     assert_eq!(
-//!         paste::expr! { [<Q R S T>].len() },
+//!         paste! { [<Q R S T>].len() },
 //!         8,
 //!     );
 //! }
@@ -52,12 +49,14 @@
 //! macro expands to a vector containing `ROUTE_A` and `ROUTE_B`.
 //!
 //! ```
+//! use paste::paste;
+//!
 //! const ROUTE_A: &str = "/a";
 //! const ROUTE_B: &str = "/b";
 //!
 //! macro_rules! routes {
 //!     ($($route:ident),*) => {{
-//!         paste::expr! {
+//!         paste! {
 //!             vec![$( [<ROUTE_ $route>] ),*]
 //!         }
 //!     }}
@@ -73,6 +72,8 @@
 //! fields.
 //!
 //! ```
+//! use paste::paste;
+//!
 //! macro_rules! make_a_struct_and_getters {
 //!     ($name:ident { $($field:ident),* }) => {
 //!         // Define a struct. This expands to:
@@ -95,7 +96,7 @@
 //!         //         pub fn get_b(&self) -> &str { &self.b }
 //!         //         pub fn get_c(&self) -> &str { &self.c }
 //!         //     }
-//!         paste::item! {
+//!         paste! {
 //!             impl $name {
 //!                 $(
 //!                     pub fn [<get_ $field>](&self) -> &str {
@@ -144,31 +145,25 @@ use proc_macro::{
 use std::iter::{self, FromIterator, Peekable};
 use std::panic;
 
-/// Paste identifiers within a macro invocation that expands to one or more
-/// items.
-///
-/// An item is like a struct definition, function, impl block, or anything else
-/// that can appear at the top level of a module scope.
 #[proc_macro]
-pub fn item(input: TokenStream) -> TokenStream {
-    expand_paste(input)
-}
-
-/// Paste identifiers within a macro invocation that expands to an expression.
-#[proc_macro]
-pub fn expr(input: TokenStream) -> TokenStream {
-    TokenStream::from(TokenTree::Group(Group::new(
-        Delimiter::Brace,
-        expand_paste(input),
-    )))
-}
-
-fn expand_paste(input: TokenStream) -> TokenStream {
+pub fn paste(input: TokenStream) -> TokenStream {
     let mut contains_paste = false;
     match expand(input, &mut contains_paste) {
         Ok(expanded) => expanded,
         Err(err) => err.to_compile_error(),
     }
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn item(input: TokenStream) -> TokenStream {
+    paste(input)
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn expr(input: TokenStream) -> TokenStream {
+    paste(input)
 }
 
 fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> {
