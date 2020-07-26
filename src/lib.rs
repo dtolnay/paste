@@ -138,8 +138,10 @@
 
 #![allow(clippy::needless_doctest_main)]
 
+mod doc;
 mod error;
 
+use crate::doc::{do_paste_doc, is_pasted_doc};
 use crate::error::{Error, Result};
 use proc_macro::{
     token_stream, Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree,
@@ -201,6 +203,15 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 } else if delimiter == Delimiter::None && is_flat_group(&content) {
                     expanded.extend(content);
                     *contains_paste = true;
+                } else if delimiter == Delimiter::Bracket
+                    && matches!(lookbehind, Lookbehind::Pound | Lookbehind::PoundBang)
+                    && is_pasted_doc(&content)
+                {
+                    let pasted = do_paste_doc(&content, span);
+                    let mut group = Group::new(delimiter, pasted);
+                    group.set_span(span);
+                    expanded.extend(iter::once(TokenTree::Group(group)));
+                    *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
                     let nested = expand(content, &mut group_contains_paste)?;
@@ -223,19 +234,18 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 }
                 lookbehind = Lookbehind::Other;
             }
-            Some(other) => {
-                lookbehind = match &other {
-                    TokenTree::Punct(punct) if punct.as_char() == ':' => {
-                        if lookbehind == Lookbehind::JointColon {
-                            Lookbehind::DoubleColon
-                        } else if punct.spacing() == Spacing::Joint {
-                            Lookbehind::JointColon
-                        } else {
-                            Lookbehind::Other
-                        }
-                    }
+            Some(TokenTree::Punct(punct)) => {
+                lookbehind = match punct.as_char() {
+                    ':' if lookbehind == Lookbehind::JointColon => Lookbehind::DoubleColon,
+                    ':' if punct.spacing() == Spacing::Joint => Lookbehind::JointColon,
+                    '#' => Lookbehind::Pound,
+                    '!' if lookbehind == Lookbehind::Pound => Lookbehind::PoundBang,
                     _ => Lookbehind::Other,
                 };
+                expanded.extend(iter::once(TokenTree::Punct(punct)));
+            }
+            Some(other) => {
+                lookbehind = Lookbehind::Other;
                 expanded.extend(iter::once(other));
             }
             None => return Ok(expanded),
@@ -247,6 +257,8 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
 enum Lookbehind {
     JointColon,
     DoubleColon,
+    Pound,
+    PoundBang,
     Other,
 }
 
