@@ -91,6 +91,7 @@ fn test_keyword() {
 #[test]
 fn test_literal_str() {
     paste::expr! {
+        #[allow(non_camel_case_types)]
         struct [<Foo "Bar-Baz">];
 
         let _ = FooBar_Baz;
@@ -308,6 +309,7 @@ mod test_to_camel {
 #[test]
 fn test_env_to_camel() {
     paste::expr! {
+        #[allow(non_upper_case_globals)]
         const [<LIB env!("CARGO_PKG_NAME"):camel>]: &str = "libpaste";
 
         let _ = LIBPaste;
