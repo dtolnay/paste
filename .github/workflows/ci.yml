@@ -12,10 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.32.0]
-        include:
-          - rust: 1.31.0
-            rustflags: --cfg no_literal_matcher
+        rust: [nightly, beta, stable, 1.45.0]
     steps:
       - uses: actions/checkout@v2
       - uses: dtolnay/rust-toolchain@master
