@@ -66,7 +66,11 @@ fn escaped_string_value(token: &TokenTree) -> Option<String> {
             } else if repr.starts_with('r') {
                 let begin = repr.find('"').unwrap() + 1;
                 let end = repr.rfind('"').unwrap();
-                Some(repr[begin..end].escape_default().to_string())
+                let mut escaped = String::new();
+                for ch in repr[begin..end].chars() {
+                    escaped.extend(ch.escape_default());
+                }
+                Some(escaped)
             } else {
                 Some(repr)
             }

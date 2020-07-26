@@ -138,6 +138,8 @@
 
 #![allow(clippy::needless_doctest_main)]
 
+extern crate proc_macro;
+
 mod doc;
 mod error;
 
@@ -204,7 +206,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     expanded.extend(content);
                     *contains_paste = true;
                 } else if delimiter == Delimiter::Bracket
-                    && matches!(lookbehind, Lookbehind::Pound | Lookbehind::PoundBang)
+                    && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang)
                     && is_pasted_doc(&content)
                 {
                     let pasted = do_paste_doc(&content, span);
