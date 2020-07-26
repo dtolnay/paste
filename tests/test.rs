@@ -1,7 +1,11 @@
+use paste::paste;
+
 mod test_basic {
+    use paste::paste;
+
     struct Struct;
 
-    paste::item! {
+    paste! {
         impl Struct {
             fn [<a b c>]() {}
         }
@@ -14,10 +18,12 @@ mod test_basic {
 }
 
 mod test_in_impl {
+    use paste::paste;
+
     struct Struct;
 
     impl Struct {
-        paste::item! {
+        paste! {
             fn [<a b c>]() {}
         }
     }
@@ -30,7 +36,7 @@ mod test_in_impl {
 
 #[test]
 fn test_shared_hygiene() {
-    paste::expr! {
+    paste! {
         let [<a a>] = 1;
         assert_eq!([<a a>], 1);
     }
@@ -43,7 +49,7 @@ fn test_repeat() {
 
     macro_rules! routes {
         ($($route:ident),*) => {{
-            paste::expr! {
+            paste! {
                 vec![$( [<ROCKET_ $route>] ),*]
             }
         }}
@@ -57,13 +63,13 @@ fn test_repeat() {
 fn test_integer() {
     const CONST0: &'static str = "const0";
 
-    let pasted = paste::expr!([<CONST 0>]);
+    let pasted = paste!([<CONST 0>]);
     assert_eq!(pasted, CONST0);
 }
 
 #[test]
 fn test_underscore() {
-    paste::expr! {
+    paste! {
         const A_B: usize = 0;
         assert_eq!([<A _ B>], 0);
     }
@@ -71,7 +77,7 @@ fn test_underscore() {
 
 #[test]
 fn test_lifetime() {
-    paste::expr! {
+    paste! {
         #[allow(dead_code)]
         struct S<[<'d e>]> {
             q: &[<'d e>] str,
@@ -81,7 +87,7 @@ fn test_lifetime() {
 
 #[test]
 fn test_keyword() {
-    paste::expr! {
+    paste! {
         struct [<F move>];
 
         let _ = Fmove;
@@ -90,7 +96,7 @@ fn test_keyword() {
 
 #[test]
 fn test_literal_str() {
-    paste::expr! {
+    paste! {
         #[allow(non_camel_case_types)]
         struct [<Foo "Bar-Baz">];
 
@@ -100,7 +106,7 @@ fn test_literal_str() {
 
 #[test]
 fn test_env_literal() {
-    paste::expr! {
+    paste! {
         struct [<Lib env bar>];
 
         let _ = Libenvbar;
@@ -109,7 +115,7 @@ fn test_env_literal() {
 
 #[test]
 fn test_env_present() {
-    paste::expr! {
+    paste! {
         struct [<Lib env!("CARGO_PKG_NAME")>];
 
         let _ = Libpaste;
@@ -118,7 +124,7 @@ fn test_env_present() {
 
 #[test]
 fn test_raw_identifier() {
-    paste::expr! {
+    paste! {
         struct [<F r#move>];
 
         let _ = Fmove;
@@ -139,7 +145,7 @@ fn test_false_start() {
         }
     }
 
-    paste::expr! {
+    paste! {
         let x = [<S as Trait>::f()];
         assert_eq!(x[0], 0);
     }
@@ -149,23 +155,25 @@ fn test_false_start() {
 fn test_local_variable() {
     let yy = 0;
 
-    paste::expr! {
+    paste! {
         assert_eq!([<y y>], 0);
     }
 }
 
 #[test]
 fn test_empty() {
-    paste::expr! {
+    paste! {
         assert_eq!(stringify!([<y y>]), "yy");
         assert_eq!(stringify!([<>]).replace(' ', ""), "[<>]");
     }
 }
 
 mod test_none_delimited_single_ident {
+    use paste::paste;
+
     macro_rules! m {
         ($id:ident) => {
-            paste::item! {
+            paste! {
                 fn f() -> &'static str {
                     stringify!($id)
                 }
@@ -182,9 +190,11 @@ mod test_none_delimited_single_ident {
 }
 
 mod test_none_delimited_single_lifetime {
+    use paste::paste;
+
     macro_rules! m {
         ($life:lifetime) => {
-            paste::item! {
+            paste! {
                 pub struct S;
                 impl<$life> S {
                     fn f() {}
@@ -202,9 +212,11 @@ mod test_none_delimited_single_lifetime {
 }
 
 mod test_to_lower {
+    use paste::paste;
+
     macro_rules! m {
         ($id:ident) => {
-            paste::item! {
+            paste! {
                 fn [<my_ $id:lower _here>](_arg: u8) -> &'static str {
                     stringify!([<$id:lower>])
                 }
@@ -222,7 +234,7 @@ mod test_to_lower {
 
 #[test]
 fn test_env_to_lower() {
-    paste::expr! {
+    paste! {
         struct [<Lib env!("CARGO_PKG_NAME"):lower>];
 
         let _ = Libpaste;
@@ -230,9 +242,11 @@ fn test_env_to_lower() {
 }
 
 mod test_to_upper {
+    use paste::paste;
+
     macro_rules! m {
         ($id:ident) => {
-            paste::item! {
+            paste! {
                 const [<MY_ $id:upper _HERE>]: &str = stringify!([<$id:upper>]);
             }
         };
@@ -248,7 +262,7 @@ mod test_to_upper {
 
 #[test]
 fn test_env_to_upper() {
-    paste::expr! {
+    paste! {
         const [<LIB env!("CARGO_PKG_NAME"):upper>]: &str = "libpaste";
 
         let _ = LIBPASTE;
@@ -256,9 +270,11 @@ fn test_env_to_upper() {
 }
 
 mod test_to_snake {
+    use paste::paste;
+
     macro_rules! m {
         ($id:ident) => {
-            paste::item! {
+            paste! {
                 const DEFAULT_SNAKE: &str = stringify!([<$id:snake>]);
                 const LOWER_SNAKE: &str = stringify!([<$id:snake:lower>]);
                 const UPPER_SNAKE: &str = stringify!([<$id:snake:upper>]);
@@ -278,7 +294,7 @@ mod test_to_snake {
 
 #[test]
 fn test_env_to_snake() {
-    paste::expr! {
+    paste! {
         const [<LIB env!("CARGO_PKG_NAME"):snake:upper>]: &str = "libpaste";
 
         let _ = LIBPASTE;
@@ -286,9 +302,11 @@ fn test_env_to_snake() {
 }
 
 mod test_to_camel {
+    use paste::paste;
+
     macro_rules! m {
         ($id:ident) => {
-            paste::item! {
+            paste! {
                 const DEFAULT_CAMEL: &str = stringify!([<$id:camel>]);
                 const LOWER_CAMEL: &str = stringify!([<$id:camel:lower>]);
                 const UPPER_CAMEL: &str = stringify!([<$id:camel:upper>]);
@@ -308,7 +326,7 @@ mod test_to_camel {
 
 #[test]
 fn test_env_to_camel() {
-    paste::expr! {
+    paste! {
         #[allow(non_upper_case_globals)]
         const [<LIB env!("CARGO_PKG_NAME"):camel>]: &str = "libpaste";
 
@@ -319,9 +337,11 @@ fn test_env_to_camel() {
 mod test_doc_expr {
     // https://github.com/dtolnay/paste/issues/29
 
+    use paste::paste;
+
     macro_rules! doc_expr {
         ($doc:expr) => {
-            paste::item! {
+            paste! {
                 #[doc = $doc]
                 pub struct S;
             }
@@ -339,6 +359,8 @@ mod test_doc_expr {
 mod test_type_in_path {
     // https://github.com/dtolnay/paste/issues/31
 
+    use paste::paste;
+
     mod keys {
         #[derive(Default)]
         pub struct Mib<T = ()>(std::marker::PhantomData<T>);
@@ -346,7 +368,7 @@ mod test_type_in_path {
 
     macro_rules! types {
         ($mib:ty) => {
-            paste::item! {
+            paste! {
                 #[derive(Default)]
                 pub struct S(pub keys::$mib);
             }
@@ -355,7 +377,7 @@ mod test_type_in_path {
 
     macro_rules! write {
         ($fn:ident, $field:ty) => {
-            paste::item! {
+            paste! {
                 pub fn $fn() -> $field {
                     $field::default()
                 }
@@ -378,11 +400,13 @@ mod test_type_in_path {
 mod test_type_in_fn_arg {
     // https://github.com/dtolnay/paste/issues/38
 
+    use paste::paste;
+
     fn _jit_address(_node: ()) {}
 
     macro_rules! jit_reexport {
         ($fn:ident, $arg:ident : $typ:ty) => {
-            paste::item! {
+            paste! {
                 pub fn $fn($arg: $typ) {
                     [<_jit_ $fn>]($arg);
                 }
@@ -401,9 +425,11 @@ mod test_type_in_fn_arg {
 mod test_pat_in_expr_position {
     // https://github.com/xiph/rav1e/pull/2324/files
 
+    use paste::paste;
+
     macro_rules! rav1e_bad {
         ($e:pat) => {
-            paste::item! {
+            paste! {
                 #[test]
                 fn test() {
                     let _ = $e;
@@ -418,10 +444,12 @@ mod test_pat_in_expr_position {
 mod test_x86_feature_literal {
     // work around https://github.com/rust-lang/rust/issues/72726
 
+    use paste::paste;
+
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     macro_rules! my_is_x86_feature_detected {
         ($feat:literal) => {
-            paste::item! {
+            paste! {
                 #[test]
                 fn test() {
                     let _ = is_x86_feature_detected!($feat);
