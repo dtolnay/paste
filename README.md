@@ -117,6 +117,28 @@ The precise Unicode conversions are as defined by [`str::to_lowercase`] and
 
 <br>
 
+## Pasting documentation strings
+
+Within the `paste!` macro, arguments to a #\[doc ...\] attribute are implicitly
+concatenated together to form a coherent documentation string.
+
+```rust
+use paste::paste;
+
+macro_rules! method_new {
+    ($ret:ident) => {
+        paste! {
+            #[doc = "Create a new `" $ret "` object."]
+            pub fn new() -> $ret { todo!() }
+        }
+    };
+}
+
+method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
+```
+
+<br>
+
 #### License
 
 <sup>

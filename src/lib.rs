@@ -112,6 +112,29 @@
 //!
 //! [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
 //! [`str::to_uppercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_uppercase
+//!
+//! <br>
+//!
+//! # Pasting documentation strings
+//!
+//! Within the `paste!` macro, arguments to a #\[doc ...\] attribute are
+//! implicitly concatenated together to form a coherent documentation string.
+//!
+//! ```
+//! use paste::paste;
+//!
+//! macro_rules! method_new {
+//!     ($ret:ident) => {
+//!         paste! {
+//!             #[doc = "Create a new `" $ret "` object."]
+//!             pub fn new() -> $ret { todo!() }
+//!         }
+//!     };
+//! }
+//!
+//! # struct Paste;
+//! method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
+//! ```
 
 #![allow(clippy::needless_doctest_main)]
 
