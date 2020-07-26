@@ -30,3 +30,11 @@ jobs:
       - uses: dtolnay/rust-toolchain@nightly
       - run: cargo -Z minimal-versions generate-lockfile
       - run: cargo check --locked
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@clippy
+      - run: cargo clippy -- -Dclippy::all
