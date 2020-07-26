@@ -228,6 +228,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     ':' if lookbehind == Lookbehind::JointColon => Lookbehind::DoubleColon,
                     ':' if punct.spacing() == Spacing::Joint => Lookbehind::JointColon,
                     '#' => Lookbehind::Pound,
+                    '!' if lookbehind == Lookbehind::Pound => Lookbehind::PoundBang,
                     _ => Lookbehind::Other,
                 };
                 expanded.extend(iter::once(TokenTree::Punct(punct)));
@@ -246,6 +247,7 @@ enum Lookbehind {
     JointColon,
     DoubleColon,
     Pound,
+    PoundBang,
     Other,
 }
 
