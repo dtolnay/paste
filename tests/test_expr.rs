@@ -200,6 +200,7 @@ mod test_x86_feature_literal {
     my_is_x86_feature_detected!("mmx");
 }
 
+#[rustversion::since(1.46)]
 mod test_local_setter {
     // https://github.com/dtolnay/paste/issues/7
 
