@@ -6,6 +6,7 @@ edition = "2018"
 license = "MIT OR Apache-2.0"
 description = "Macros for all your token pasting needs"
 repository = "https://github.com/dtolnay/paste"
+categories = ["no-std"]
 readme = "README.md"
 
 [lib]
