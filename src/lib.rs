@@ -347,7 +347,7 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
         None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
-    let segments = parse_segments(&mut tokens, scope)?;
+    let segments = parse_segments(&mut tokens)?;
 
     match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
@@ -364,10 +364,7 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
     }
 }
 
-fn parse_segments(
-    tokens: &mut Peekable<token_stream::IntoIter>,
-    scope: Span,
-) -> Result<Vec<Segment>> {
+fn parse_segments(tokens: &mut Peekable<token_stream::IntoIter>) -> Result<Vec<Segment>> {
     let mut segments = Vec::new();
     while match tokens.peek() {
         None => false,
@@ -386,7 +383,7 @@ fn parse_segments(
                         _ => false,
                     }
                 {
-                    tokens.next().unwrap(); // `!`
+                    let bang = tokens.next().unwrap(); // `!`
                     let expect_group = tokens.next();
                     let parenthesized = match &expect_group {
                         Some(TokenTree::Group(group))
@@ -395,7 +392,13 @@ fn parse_segments(
                             group
                         }
                         Some(wrong) => return Err(Error::new(wrong.span(), "expected `(`")),
-                        None => return Err(Error::new(scope, "expected `(` after `env!`")),
+                        None => {
+                            return Err(Error::new2(
+                                ident.span(),
+                                bang.span(),
+                                "expected `(` after `env!`",
+                            ));
+                        }
                     };
                     let mut inner = parenthesized.stream().into_iter();
                     let lit = match inner.next() {
@@ -450,11 +453,12 @@ fn parse_segments(
                 '_' => segments.push(Segment::String("_".to_owned())),
                 '\'' => segments.push(Segment::Apostrophe(punct.span())),
                 ':' => {
-                    let colon = Colon { span: punct.span() };
+                    let colon_span = punct.span();
+                    let colon = Colon { span: colon_span };
                     let ident = match tokens.next() {
                         Some(TokenTree::Ident(ident)) => ident,
                         wrong => {
-                            let span = wrong.as_ref().map_or(scope, TokenTree::span);
+                            let span = wrong.as_ref().map_or(colon_span, TokenTree::span);
                             return Err(Error::new(span, "expected identifier after `:`"));
                         }
                     };
@@ -465,7 +469,7 @@ fn parse_segments(
             TokenTree::Group(group) => {
                 if group.delimiter() == Delimiter::None {
                     let mut inner = group.stream().into_iter().peekable();
-                    let nested = parse_segments(&mut inner, group.span())?;
+                    let nested = parse_segments(&mut inner)?;
                     if let Some(unexpected) = inner.next() {
                         return Err(Error::new(unexpected.span(), "unexpected token"));
                     }
