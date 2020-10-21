@@ -199,7 +199,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 let span = group.span();
                 if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
                     let segments = parse_bracket_as_segments(content, span)?;
-                    let pasted = paste_segments(&segments)?;
+                    let pasted = segment::paste(&segments)?;
                     let tokens = pasted_to_tokens(pasted, span)?;
                     expanded.extend(tokens);
                     *contains_paste = true;
@@ -347,100 +347,6 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
         )),
         None => Ok(segments),
     }
-}
-
-fn paste_segments(segments: &[Segment]) -> Result<String> {
-    let mut evaluated = Vec::new();
-    let mut is_lifetime = false;
-
-    for segment in segments {
-        match segment {
-            Segment::String(segment) => {
-                evaluated.push(segment.clone());
-            }
-            Segment::Apostrophe(span) => {
-                if is_lifetime {
-                    return Err(Error::new(*span, "unexpected lifetime"));
-                }
-                is_lifetime = true;
-            }
-            Segment::Env(var) => {
-                let resolved = match std::env::var(&var.value) {
-                    Ok(resolved) => resolved,
-                    Err(_) => {
-                        return Err(Error::new(
-                            var.span,
-                            &format!("no such env var: {:?}", var.value),
-                        ));
-                    }
-                };
-                let resolved = resolved.replace('-', "_");
-                evaluated.push(resolved);
-            }
-            Segment::Modifier(colon, ident) => {
-                let last = match evaluated.pop() {
-                    Some(last) => last,
-                    None => {
-                        return Err(Error::new2(colon.span, ident.span(), "unexpected modifier"))
-                    }
-                };
-                match ident.to_string().as_str() {
-                    "lower" => {
-                        evaluated.push(last.to_lowercase());
-                    }
-                    "upper" => {
-                        evaluated.push(last.to_uppercase());
-                    }
-                    "snake" => {
-                        let mut acc = String::new();
-                        let mut prev = '_';
-                        for ch in last.chars() {
-                            if ch.is_uppercase() && prev != '_' {
-                                acc.push('_');
-                            }
-                            acc.push(ch);
-                            prev = ch;
-                        }
-                        evaluated.push(acc.to_lowercase());
-                    }
-                    "camel" => {
-                        let mut acc = String::new();
-                        let mut prev = '_';
-                        for ch in last.chars() {
-                            if ch != '_' {
-                                if prev == '_' {
-                                    for chu in ch.to_uppercase() {
-                                        acc.push(chu);
-                                    }
-                                } else if prev.is_uppercase() {
-                                    for chl in ch.to_lowercase() {
-                                        acc.push(chl);
-                                    }
-                                } else {
-                                    acc.push(ch);
-                                }
-                            }
-                            prev = ch;
-                        }
-                        evaluated.push(acc);
-                    }
-                    _ => {
-                        return Err(Error::new2(
-                            colon.span,
-                            ident.span(),
-                            "unsupported modifier",
-                        ));
-                    }
-                }
-            }
-        }
-    }
-
-    let mut pasted = evaluated.into_iter().collect::<String>();
-    if is_lifetime {
-        pasted.insert(0, '\'');
-    }
-    Ok(pasted)
 }
 
 fn pasted_to_tokens(mut pasted: String, span: Span) -> Result<TokenStream> {
