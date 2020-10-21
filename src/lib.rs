@@ -148,7 +148,7 @@ use crate::doc::{do_paste_doc, is_pasted_doc};
 use crate::error::{Error, Result};
 use crate::segment::Segment;
 use proc_macro::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::iter::{self, FromIterator};
+use std::iter;
 use std::panic;
 
 #[proc_macro]
@@ -199,8 +199,9 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 let span = group.span();
                 if delimiter == Delimiter::Bracket && is_paste_operation(&content) {
                     let segments = parse_bracket_as_segments(content, span)?;
-                    let pasted = paste_segments(span, &segments)?;
-                    expanded.extend(pasted);
+                    let pasted = paste_segments(&segments)?;
+                    let tokens = pasted_to_tokens(pasted, span)?;
+                    expanded.extend(tokens);
                     *contains_paste = true;
                 } else if delimiter == Delimiter::None && is_flat_group(&content) {
                     expanded.extend(content);
@@ -348,7 +349,7 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
     }
 }
 
-fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
+fn paste_segments(segments: &[Segment]) -> Result<String> {
     let mut evaluated = Vec::new();
     let mut is_lifetime = false;
 
@@ -435,7 +436,23 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
         }
     }
 
-    let pasted = evaluated.into_iter().collect::<String>();
+    let mut pasted = evaluated.into_iter().collect::<String>();
+    if is_lifetime {
+        pasted.insert(0, '\'');
+    }
+    Ok(pasted)
+}
+
+fn pasted_to_tokens(mut pasted: String, span: Span) -> Result<TokenStream> {
+    let mut tokens = TokenStream::new();
+
+    if pasted.starts_with('\'') {
+        let mut apostrophe = TokenTree::Punct(Punct::new('\'', Spacing::Joint));
+        apostrophe.set_span(span);
+        tokens.extend(iter::once(apostrophe));
+        pasted.remove(0);
+    }
+
     let ident = match panic::catch_unwind(|| Ident::new(&pasted, span)) {
         Ok(ident) => TokenTree::Ident(ident),
         Err(_) => {
@@ -445,11 +462,7 @@ fn paste_segments(span: Span, segments: &[Segment]) -> Result<TokenStream> {
             ));
         }
     };
-    let tokens = if is_lifetime {
-        let apostrophe = TokenTree::Punct(Punct::new('\'', Spacing::Joint));
-        vec![apostrophe, ident]
-    } else {
-        vec![ident]
-    };
-    Ok(TokenStream::from_iter(tokens))
+
+    tokens.extend(iter::once(ident));
+    Ok(tokens)
 }
