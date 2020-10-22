@@ -3,7 +3,7 @@ use proc_macro::{token_stream, Delimiter, Ident, Span, TokenTree};
 use std::iter::Peekable;
 
 pub(crate) enum Segment {
-    String(String),
+    String(LitStr),
     Apostrophe(Span),
     Env(LitStr),
     Modifier(Colon, Ident),
@@ -89,7 +89,10 @@ pub(crate) fn parse(tokens: &mut Peekable<token_stream::IntoIter>) -> Result<Vec
                         ));
                     }
                 } else {
-                    segments.push(Segment::String(fragment));
+                    segments.push(Segment::String(LitStr {
+                        value: fragment,
+                        span: ident.span(),
+                    }));
                 }
             }
             TokenTree::Literal(lit) => {
@@ -101,10 +104,16 @@ pub(crate) fn parse(tokens: &mut Peekable<token_stream::IntoIter>) -> Result<Vec
                     .replace('"', "")
                     .replace('\'', "")
                     .replace('-', "_");
-                segments.push(Segment::String(lit_string));
+                segments.push(Segment::String(LitStr {
+                    value: lit_string,
+                    span: lit.span(),
+                }));
             }
             TokenTree::Punct(punct) => match punct.as_char() {
-                '_' => segments.push(Segment::String("_".to_owned())),
+                '_' => segments.push(Segment::String(LitStr {
+                    value: "_".to_owned(),
+                    span: punct.span(),
+                })),
                 '\'' => segments.push(Segment::Apostrophe(punct.span())),
                 ':' => {
                     let colon_span = punct.span();
@@ -144,7 +153,7 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
     for segment in segments {
         match segment {
             Segment::String(segment) => {
-                evaluated.push(segment.clone());
+                evaluated.push(segment.value.clone());
             }
             Segment::Apostrophe(span) => {
                 if is_lifetime {
