@@ -332,7 +332,7 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
         None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
-    let segments = segment::parse(&mut tokens)?;
+    let mut segments = segment::parse(&mut tokens)?;
 
     match &tokens.next() {
         Some(TokenTree::Punct(punct)) if punct.as_char() == '>' => {}
@@ -340,13 +340,27 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
         None => return Err(Error::new(scope, "expected `[< ... >]`")),
     }
 
-    match tokens.next() {
-        Some(unexpected) => Err(Error::new(
+    if let Some(unexpected) = tokens.next() {
+        return Err(Error::new(
             unexpected.span(),
             "unexpected input, expected `[< ... >]`",
-        )),
-        None => Ok(segments),
+        ));
     }
+
+    for segment in &mut segments {
+        if let Segment::String(string) = segment {
+            if string.value.contains(&['#', '\\', '.', '+'][..]) {
+                return Err(Error::new(string.span, "unsupported literal"));
+            }
+            string.value = string
+                .value
+                .replace('"', "")
+                .replace('\'', "")
+                .replace('-', "_");
+        }
+    }
+
+    Ok(segments)
 }
 
 fn pasted_to_tokens(mut pasted: String, span: Span) -> Result<TokenStream> {

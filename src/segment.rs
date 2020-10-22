@@ -96,16 +96,8 @@ pub(crate) fn parse(tokens: &mut Peekable<token_stream::IntoIter>) -> Result<Vec
                 }
             }
             TokenTree::Literal(lit) => {
-                let mut lit_string = lit.to_string();
-                if lit_string.contains(&['#', '\\', '.', '+'][..]) {
-                    return Err(Error::new(lit.span(), "unsupported literal"));
-                }
-                lit_string = lit_string
-                    .replace('"', "")
-                    .replace('\'', "")
-                    .replace('-', "_");
                 segments.push(Segment::String(LitStr {
-                    value: lit_string,
+                    value: lit.to_string(),
                     span: lit.span(),
                 }));
             }
