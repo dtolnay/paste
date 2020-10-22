@@ -42,3 +42,13 @@ fn test_literals() {
     let expected = "int=0x1 bool=true float=0.01";
     assert_eq!(doc, expected);
 }
+
+#[test]
+fn test_case() {
+    let doc = paste! {
+        get_doc!(#[doc = "HTTP " get:upper "!"])
+    };
+
+    let expected = "HTTP GET!";
+    assert_eq!(doc, expected);
+}

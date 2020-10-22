@@ -210,7 +210,7 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang)
                     && is_pasted_doc(&content)
                 {
-                    let pasted = do_paste_doc(&content, span);
+                    let pasted = do_paste_doc(&content, span)?;
                     let mut group = Group::new(delimiter, pasted);
                     group.set_span(span);
                     expanded.extend(iter::once(TokenTree::Group(group)));
