@@ -19,11 +19,9 @@ pub fn expand_attr(
     let group = match tokens.next() {
         Some(TokenTree::Punct(ref punct)) if punct.as_char() == '=' => {
             let mut count = 0;
-            if tokens.inspect(|_| count += 1).all(|tt| is_stringlike(&tt)) {
-                if count > 1 {
-                    *contains_paste = true;
-                    return do_paste_name_value_attr(attr, span);
-                }
+            if tokens.inspect(|_| count += 1).all(|tt| is_stringlike(&tt)) && count > 1 {
+                *contains_paste = true;
+                return do_paste_name_value_attr(attr, span);
             }
             return Ok(attr);
         }
