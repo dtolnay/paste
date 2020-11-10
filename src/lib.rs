@@ -140,11 +140,11 @@
 
 extern crate proc_macro;
 
-mod doc;
+mod attr;
 mod error;
 mod segment;
 
-use crate::doc::{do_paste_doc, is_pasted_doc};
+use crate::attr::expand_attr;
 use crate::error::{Error, Result};
 use crate::segment::Segment;
 use proc_macro::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
@@ -206,18 +206,17 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                 } else if delimiter == Delimiter::None && is_flat_group(&content) {
                     expanded.extend(content);
                     *contains_paste = true;
-                } else if delimiter == Delimiter::Bracket
-                    && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang)
-                    && is_pasted_doc(&content)
-                {
-                    let pasted = do_paste_doc(&content, span)?;
-                    let mut group = Group::new(delimiter, pasted);
-                    group.set_span(span);
-                    expanded.extend(iter::once(TokenTree::Group(group)));
-                    *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
-                    let nested = expand(content, &mut group_contains_paste)?;
+                    let nested = match delimiter {
+                        Delimiter::Bracket if lookbehind == Lookbehind::Pound => {
+                            expand_attr(content, span, &mut group_contains_paste)?
+                        }
+                        Delimiter::Bracket if lookbehind == Lookbehind::PoundBang => {
+                            expand_attr(content, span, &mut group_contains_paste)?
+                        }
+                        _ => expand(content, &mut group_contains_paste)?,
+                    };
                     let group = if group_contains_paste {
                         let mut group = Group::new(delimiter, nested);
                         group.set_span(span);
