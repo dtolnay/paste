@@ -13,6 +13,7 @@ readme = "README.md"
 proc-macro = true
 
 [dev-dependencies]
+paste-test-suite = { version = "0", path = "tests/macros" }
 rustversion = "1.0"
 trybuild = "1.0"
 
