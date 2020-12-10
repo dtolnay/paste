@@ -208,15 +208,12 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
-                    let nested = match delimiter {
-                        Delimiter::Bracket if lookbehind == Lookbehind::Pound => {
-                            expand_attr(content, span, &mut group_contains_paste)?
-                        }
-                        Delimiter::Bracket if lookbehind == Lookbehind::PoundBang => {
-                            expand_attr(content, span, &mut group_contains_paste)?
-                        }
-                        _ => expand(content, &mut group_contains_paste)?,
-                    };
+                    let mut nested = expand(content, &mut group_contains_paste)?;
+                    if delimiter == Delimiter::Bracket
+                        && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang)
+                    {
+                        nested = expand_attr(nested, span, &mut group_contains_paste)?
+                    }
                     let group = if group_contains_paste {
                         let mut group = Group::new(delimiter, nested);
                         group.set_span(span);
