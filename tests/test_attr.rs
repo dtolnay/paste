@@ -12,11 +12,15 @@ fn test_attr() {
 
         #[::paste_test_suite::paste_test(k = "val" "ue")]
         struct C;
+
+        #[paste_test(k = "va" [<l u>] e)]
+        struct D;
     }
 
     let _ = A;
     let _ = B;
     let _ = C;
+    let _ = D;
 }
 
 #[test]
