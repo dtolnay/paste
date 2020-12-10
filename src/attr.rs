@@ -14,8 +14,10 @@ pub fn expand_attr(
     let mut leading_colons = 0; // $(::)?
     let mut leading_path = 0; // $($ident)::+
 
+    let mut token;
     let group = loop {
-        match tokens.next() {
+        token = tokens.next();
+        match token {
             // colon after `$(:)?`
             Some(TokenTree::Punct(ref punct))
                 if punct.as_char() == ':' && leading_colons < 2 && leading_path == 0 =>
@@ -43,7 +45,7 @@ pub fn expand_attr(
                 return Ok(attr);
             }
             // parens after `$(::)? $($ident)::+`
-            Some(TokenTree::Group(group))
+            Some(TokenTree::Group(ref group))
                 if group.delimiter() == Delimiter::Parenthesis && leading_path % 3 == 1 =>
             {
                 break group;

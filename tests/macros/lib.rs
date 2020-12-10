@@ -1,3 +1,5 @@
+extern crate proc_macro;
+
 use proc_macro::{TokenStream, TokenTree};
 
 #[proc_macro_attribute]
@@ -8,11 +10,11 @@ pub fn paste_test(args: TokenStream, input: TokenStream) -> TokenStream {
         _ => panic!("{}", args),
     }
     match iter.next() {
-        Some(TokenTree::Punct(punct)) if punct.as_char() == '=' => {}
+        Some(TokenTree::Punct(ref punct)) if punct.as_char() == '=' => {}
         _ => panic!("{}", args),
     }
     match iter.next() {
-        Some(TokenTree::Literal(literal)) if literal.to_string().starts_with('"') => {}
+        Some(TokenTree::Literal(ref literal)) if literal.to_string().starts_with('"') => {}
         _ => panic!("{}", args),
     }
     match iter.next() {
