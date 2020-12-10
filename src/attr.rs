@@ -11,27 +11,49 @@ pub fn expand_attr(
     contains_paste: &mut bool,
 ) -> Result<TokenStream> {
     let mut tokens = attr.clone().into_iter();
-    match tokens.next() {
-        Some(TokenTree::Ident(..)) => {}
-        _ => return Ok(attr),
-    }
+    let mut leading_colons = 0; // $(::)?
+    let mut leading_path = 0; // $($ident)::+
 
-    let group = match tokens.next() {
-        Some(TokenTree::Punct(ref punct)) if punct.as_char() == '=' => {
-            let mut count = 0;
-            if tokens.inspect(|_| count += 1).all(|tt| is_stringlike(&tt)) && count > 1 {
-                *contains_paste = true;
-                return do_paste_name_value_attr(attr, span);
+    let mut token;
+    let group = loop {
+        token = tokens.next();
+        match token {
+            // colon after `$(:)?`
+            Some(TokenTree::Punct(ref punct))
+                if punct.as_char() == ':' && leading_colons < 2 && leading_path == 0 =>
+            {
+                leading_colons += 1;
             }
-            return Ok(attr);
+            // ident after `$(::)? $($ident ::)*`
+            Some(TokenTree::Ident(_)) if leading_colons != 1 && leading_path % 3 == 0 => {
+                leading_path += 1;
+            }
+            // colon after `$(::)? $($ident ::)* $ident $(:)?`
+            Some(TokenTree::Punct(ref punct)) if punct.as_char() == ':' && leading_path % 3 > 0 => {
+                leading_path += 1;
+            }
+            // eq+value after `$(::)? $($ident)::+`
+            Some(TokenTree::Punct(ref punct))
+                if punct.as_char() == '=' && leading_path % 3 == 1 =>
+            {
+                let mut count = 0;
+                if tokens.inspect(|_| count += 1).all(|tt| is_stringlike(&tt)) && count > 1 {
+                    *contains_paste = true;
+                    let leading = leading_colons + leading_path;
+                    return do_paste_name_value_attr(attr, span, leading);
+                }
+                return Ok(attr);
+            }
+            // parens after `$(::)? $($ident)::+`
+            Some(TokenTree::Group(ref group))
+                if group.delimiter() == Delimiter::Parenthesis && leading_path % 3 == 1 =>
+            {
+                break group;
+            }
+            // bail out
+            _ => return Ok(attr),
         }
-        Some(TokenTree::Group(group)) => group,
-        _ => return Ok(attr),
     };
-
-    if group.delimiter() != Delimiter::Parenthesis {
-        return Ok(attr);
-    }
 
     // There can't be anything else after the first group in a valid attribute.
     if tokens.next().is_some() {
@@ -71,7 +93,7 @@ pub fn expand_attr(
         Ok(attr
             .into_iter()
             // Just keep the initial ident in `#[ident(...)]`.
-            .take(1)
+            .take(leading_colons + leading_path)
             .chain(iter::once(TokenTree::Group(group)))
             .collect())
     } else {
@@ -79,10 +101,10 @@ pub fn expand_attr(
     }
 }
 
-fn do_paste_name_value_attr(attr: TokenStream, span: Span) -> Result<TokenStream> {
+fn do_paste_name_value_attr(attr: TokenStream, span: Span, leading: usize) -> Result<TokenStream> {
     let mut expanded = TokenStream::new();
     let mut tokens = attr.into_iter().peekable();
-    expanded.extend(tokens.by_ref().take(2)); // `doc =`
+    expanded.extend(tokens.by_ref().take(leading + 1)); // `doc =`
 
     let mut segments = segment::parse(&mut tokens)?;
 
