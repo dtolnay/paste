@@ -136,7 +136,13 @@
 //! method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
 //! ```
 
-#![allow(clippy::needless_doctest_main)]
+#![allow(
+    clippy::doc_markdown,
+    clippy::explicit_into_iter_loop,
+    clippy::module_name_repetitions,
+    clippy::needless_doctest_main,
+    clippy::too_many_lines,
+)]
 
 extern crate proc_macro;
 
