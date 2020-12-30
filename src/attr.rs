@@ -63,7 +63,7 @@ pub fn expand_attr(
     let mut group_contains_paste = false;
     let mut expanded = TokenStream::new();
     let mut nested_attr = TokenStream::new();
-    for tt in group.stream().into_iter() {
+    for tt in group.stream() {
         match &tt {
             TokenTree::Punct(punct) if punct.as_char() == ',' => {
                 expanded.extend(expand_attr(
