@@ -127,9 +127,13 @@ use paste::paste;
 
 macro_rules! method_new {
     ($ret:ident) => {
-        paste! {
-            #[doc = "Create a new `" $ret "` object."]
-            pub fn new() -> $ret { todo!() }
+        pub struct $ret {}
+
+        impl $ret {
+            paste! {
+                #[doc = "Create a new `" $ret "` object."]
+                pub fn new() -> $ret { todo!() }
+            }
         }
     };
 }
