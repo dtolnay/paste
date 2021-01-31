@@ -125,16 +125,14 @@
 //!
 //! macro_rules! method_new {
 //!     ($ret:ident) => {
-//!         pub struct $ret {}
-//!
-//!         impl $ret {
-//!             paste! {
-//!                 #[doc = "Create a new `" $ret "` object."]
-//!                 pub fn new() -> $ret { todo!() }
-//!             }
+//!         paste! {
+//!             #[doc = "Create a new `" $ret "` object."]
+//!             pub fn new() -> $ret { todo!() }
 //!         }
 //!     };
 //! }
+//!
+//! pub struct Paste {}
 //!
 //! method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
 //! ```
