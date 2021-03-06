@@ -180,6 +180,12 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
                     "upper" => {
                         evaluated.push(last.to_uppercase());
                     }
+                    "capitalize" => {
+                        evaluated.push(transform_first_char(&last, char::to_uppercase));
+                    }
+                    "decapitalize" => {
+                        evaluated.push(transform_first_char(&last, char::to_lowercase));
+                    }
                     "snake" => {
                         let mut acc = String::new();
                         let mut prev = '_';
@@ -230,4 +236,25 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
         pasted.insert(0, '\'');
     }
     Ok(pasted)
+}
+
+// Apply some transformation on the first character of the input string. 
+// The resulting characters replace the first character.
+fn transform_first_char<I>(input: &str, transform: impl Fn(char) -> I) -> String
+where
+    I: Iterator<Item = char>,
+{
+    let mut transformed = String::new();
+    let mut first = true;
+    for c in input.chars() {
+        if first {
+            for c in transform(c) {
+                transformed.push(c);
+            }
+        } else {
+            transformed.push(c);
+        }
+        first = false;
+    }
+    transformed
 }
