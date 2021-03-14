@@ -141,7 +141,7 @@
     clippy::doc_markdown,
     clippy::module_name_repetitions,
     clippy::needless_doctest_main,
-    clippy::too_many_lines,
+    clippy::too_many_lines
 )]
 
 extern crate proc_macro;
