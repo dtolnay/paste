@@ -160,7 +160,8 @@ use std::panic;
 #[proc_macro]
 pub fn paste(input: TokenStream) -> TokenStream {
     let mut contains_paste = false;
-    match expand(input, &mut contains_paste) {
+    let flatten_single_interpolation = true;
+    match expand(input, &mut contains_paste, flatten_single_interpolation) {
         Ok(expanded) => expanded,
         Err(err) => err.to_compile_error(),
     }
@@ -178,7 +179,11 @@ pub fn expr(input: TokenStream) -> TokenStream {
     paste(input)
 }
 
-fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> {
+fn expand(
+    input: TokenStream,
+    contains_paste: &mut bool,
+    flatten_single_interpolation: bool,
+) -> Result<TokenStream> {
     let mut expanded = TokenStream::new();
     let mut lookbehind = Lookbehind::Other;
     let mut prev_none_group = None::<Group>;
@@ -209,15 +214,22 @@ fn expand(input: TokenStream, contains_paste: &mut bool) -> Result<TokenStream> 
                     let tokens = pasted_to_tokens(pasted, span)?;
                     expanded.extend(tokens);
                     *contains_paste = true;
-                } else if delimiter == Delimiter::None && is_flat_group(&content) {
+                } else if flatten_single_interpolation
+                    && delimiter == Delimiter::None
+                    && is_single_interpolation_group(&content)
+                {
                     expanded.extend(content);
                     *contains_paste = true;
                 } else {
                     let mut group_contains_paste = false;
-                    let mut nested = expand(content, &mut group_contains_paste)?;
-                    if delimiter == Delimiter::Bracket
-                        && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang)
-                    {
+                    let is_attribute = delimiter == Delimiter::Bracket
+                        && (lookbehind == Lookbehind::Pound || lookbehind == Lookbehind::PoundBang);
+                    let mut nested = expand(
+                        content,
+                        &mut group_contains_paste,
+                        flatten_single_interpolation && !is_attribute,
+                    )?;
+                    if is_attribute {
                         nested = expand_attr(nested, span, &mut group_contains_paste)?
                     }
                     let group = if group_contains_paste {
@@ -268,7 +280,7 @@ enum Lookbehind {
 }
 
 // https://github.com/dtolnay/paste/issues/26
-fn is_flat_group(input: &TokenStream) -> bool {
+fn is_single_interpolation_group(input: &TokenStream) -> bool {
     #[derive(PartialEq)]
     enum State {
         Init,
