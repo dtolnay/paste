@@ -52,3 +52,26 @@ fn test_case() {
     let expected = "HTTP GET!";
     assert_eq!(doc, expected);
 }
+
+// https://github.com/dtolnay/paste/issues/63
+#[test]
+fn test_stringify() {
+    macro_rules! create {
+        ($doc:expr) => {
+            paste! {
+                #[doc = $doc]
+                pub struct Struct;
+            }
+        };
+    }
+
+    macro_rules! forward {
+        ($name:ident) => {
+            create!(stringify!($name));
+        };
+    }
+
+    forward!(documentation);
+
+    let _ = Struct;
+}
