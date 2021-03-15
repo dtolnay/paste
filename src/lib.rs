@@ -154,8 +154,8 @@ use crate::attr::expand_attr;
 use crate::error::{Error, Result};
 use crate::segment::Segment;
 use proc_macro::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
-use std::iter;
 use std::panic;
+use std::{fmt::Write, iter};
 
 #[proc_macro]
 pub fn paste(input: TokenStream) -> TokenStream {
@@ -338,15 +338,8 @@ fn is_paste_operation(input: &TokenStream) -> bool {
 }
 
 fn escape(s: &str) -> std::result::Result<String, String> {
-    use std::fmt::Write;
-    let mut r = String::new();
-
     fn wrap_option<T>(v: Option<T>) -> std::result::Result<T, String> {
-        if let Some(v) = v {
-            Ok(v)
-        } else {
-            Err("char not found".to_string())
-        }
+        v.map_or_else(|| Err("char not found".to_string()), Ok)
     }
 
     fn escape_inner(
@@ -360,46 +353,48 @@ fn escape(s: &str) -> std::result::Result<String, String> {
                     'x' => {
                         let d1 = *wrap_option(iter.peek())?;
                         let d2 = *wrap_option(iter.peek())?;
-                        let e = format!("{}{}", d1, d2).parse::<u8>()? as char;
-                        write!(r, "{}", e)?;
+                        let c = format!("{}{}", d1, d2).parse::<u8>()? as char;
+                        r.write_char(c)?;
                     }
                     'n' => {
-                        write!(r, "\n")?;
+                        r.write_char('\n')?;
                         iter.next();
                     }
                     'r' => {
-                        write!(r, "\r")?;
+                        r.write_char('\r')?;
                         iter.next();
                     }
                     't' => {
-                        write!(r, "\t")?;
+                        r.write_char('\t')?;
                         iter.next();
                     }
                     '\\' => {
-                        write!(r, "\\")?;
+                        r.write_char('\\')?;
                         iter.next();
                     }
                     '0' => {
-                        write!(r, "\0")?;
+                        r.write_char('\0')?;
                         iter.next();
                     }
                     '\'' => {
-                        write!(r, "\'")?;
+                        r.write_char('\'')?;
                         iter.next();
                     }
                     '\"' => {
-                        write!(r, "\"")?;
+                        r.write_char('\"')?;
                         iter.next();
                     }
                     // TODO: Add support for \u{} unicode escaping
                     _ => return Err("invalid escape".into()),
                 }
             } else {
-                write!(r, "{}", c)?;
+                r.write_char(c)?;
             }
         }
         Ok(())
     }
+
+    let mut r = String::new();
 
     match escape_inner(s, &mut r) {
         Ok(_) => Ok(r),

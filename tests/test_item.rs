@@ -177,8 +177,8 @@ mod test_to_hex {
     m!(r#"\Test/"#);
 
     #[test]
-    fn test_to_lower() {
-        assert_eq!(my_5c546573742f_here(0), "5c546573742f");
+    fn test_to_hex() {
+        assert_eq!(my_5c546573742f_here(0), "_5c546573742f");
     }
 }
 
