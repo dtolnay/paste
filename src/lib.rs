@@ -337,6 +337,76 @@ fn is_paste_operation(input: &TokenStream) -> bool {
     }
 }
 
+fn escape(s: &str) -> std::result::Result<String, String> {
+    use std::fmt::Write;
+    let mut r = String::new();
+
+    fn wrap_option<T>(v: Option<T>) -> std::result::Result<T, String> {
+        if let Some(v) = v {
+            Ok(v)
+        } else {
+            Err("char not found".to_string())
+        }
+    }
+
+    fn escape_inner(
+        s: &str,
+        r: &mut String,
+    ) -> std::result::Result<(), Box<dyn std::error::Error + 'static>> {
+        let mut iter = s.chars().peekable();
+        while let Some(c) = iter.next() {
+            if c == '\\' {
+                match wrap_option(iter.peek())? {
+                    'x' => {
+                        let d1 = *wrap_option(iter.peek())?;
+                        let d2 = *wrap_option(iter.peek())?;
+                        let e = format!("{}{}", d1, d2).parse::<u8>()? as char;
+                        write!(r, "{}", e)?;
+                    }
+                    'n' => {
+                        write!(r, "\n")?;
+                        iter.next();
+                    }
+                    'r' => {
+                        write!(r, "\r")?;
+                        iter.next();
+                    }
+                    't' => {
+                        write!(r, "\t")?;
+                        iter.next();
+                    }
+                    '\\' => {
+                        write!(r, "\\")?;
+                        iter.next();
+                    }
+                    '0' => {
+                        write!(r, "\0")?;
+                        iter.next();
+                    }
+                    '\'' => {
+                        write!(r, "\'")?;
+                        iter.next();
+                    }
+                    '\"' => {
+                        write!(r, "\"")?;
+                        iter.next();
+                    }
+                    // TODO: Add support for \u{} unicode escaping
+                    _ => return Err("invalid escape".into()),
+                }
+            } else {
+                write!(r, "{}", c)?;
+            }
+        }
+        Ok(())
+    }
+
+    match escape_inner(s, &mut r) {
+        Ok(_) => Ok(r),
+        Err(err) => Err(err.to_string()),
+    }
+}
+
 fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segment>> {
     let mut tokens = input.into_iter().peekable();
 
@@ -361,8 +431,31 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
         ));
     }
 
-    for segment in &mut segments {
-        if let Segment::String(string) = segment {
+    let len = segments.len();
+    for i in 0..len {
+        if i < len - 1 {
+            if let Segment::Modifier(_, id) = &segments[i + 1] {
+                if id.to_string() == "hex" {
+                    if let Segment::String(string) = &mut segments[i] {
+                        let s = string.value.as_str();
+                        if s.starts_with('\"') && s.ends_with('\"')
+                            || s.starts_with('\'') && s.ends_with('\'')
+                        {
+                            match escape(&s[1..s.len() - 1]) {
+                                Ok(s) => {
+                                    string.value = s;
+                                }
+                                Err(s) => {
+                                    return Err(Error::new(string.span, s.as_str()));
+                                }
+                            }
+                        } else if s.starts_with("r#\"") && s.ends_with("\"#") {
+                            string.value = s[3..s.len() - 2].to_string();
+                        }
+                    }
+                }
+            }
+        } else if let Segment::String(string) = &mut segments[i] {
             if string.value.contains(&['#', '\\', '.', '+'][..]) {
                 return Err(Error::new(string.span, "unsupported literal"));
             }

@@ -165,7 +165,7 @@ mod test_to_hex {
     use paste::paste;
 
     macro_rules! m {
-        ($id:ident) => {
+        ($id:expr) => {
             paste! {
                 fn [<my $id:hex _here>](_arg: u8) -> &'static str {
                     stringify!([<$id:hex>])
@@ -174,11 +174,11 @@ mod test_to_hex {
         };
     }
 
-    m!(Test);
+    m!(r#"\Test/"#);
 
     #[test]
     fn test_to_lower() {
-        assert_eq!(my_54657374_here(0), "_54657374");
+        assert_eq!(my_5c546573742f_here(0), "5c546573742f");
     }
 }
 
