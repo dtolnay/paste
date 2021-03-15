@@ -22,6 +22,10 @@ impl Error {
         }
     }
 
+    pub fn new2_owned(begin: Span, end: Span, msg: String) -> Self {
+        Error { begin, end, msg }
+    }
+
     pub fn to_compile_error(&self) -> TokenStream {
         // compile_error! { $msg }
         TokenStream::from_iter(vec![

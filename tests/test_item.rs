@@ -161,6 +161,27 @@ mod test_to_camel {
     }
 }
 
+mod test_to_hex {
+    use paste::paste;
+
+    macro_rules! m {
+        ($id:ident) => {
+            paste! {
+                fn [<my $id:hex _here>](_arg: u8) -> &'static str {
+                    stringify!([<$id:hex>])
+                }
+            }
+        };
+    }
+
+    m!(Test);
+
+    #[test]
+    fn test_to_lower() {
+        assert_eq!(my_54657374_here(0), "_54657374");
+    }
+}
+
 mod test_doc_expr {
     // https://github.com/dtolnay/paste/issues/29
 

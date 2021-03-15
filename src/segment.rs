@@ -213,6 +213,22 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
                         }
                         evaluated.push(acc);
                     }
+                    "hex" => {
+                        // A valid identifier must be prefixed with '_' or an alphabet.
+                        // Using '_' as the prefix so that it can be omitted while converted to camel case.
+                        let mut acc = "_".to_string();
+                        for &byte in last.as_bytes() {
+                            use std::fmt::Write;
+                            if let Err(e) = write!(&mut acc, "{:x}", byte) {
+                                return Err(Error::new2_owned(
+                                    colon.span,
+                                    ident.span(),
+                                    format!("{}", e),
+                                ));
+                            }
+                        }
+                        evaluated.push(acc)
+                    }
                     _ => {
                         return Err(Error::new2(
                             colon.span,
