@@ -13,4 +13,4 @@ note: the lint level is defined here
 1  | #![deny(warnings)]
    |         ^^^^^^^^
    = note: `#[deny(non_snake_case)]` implied by `#[deny(warnings)]`
-   = note: this error originates in a macro (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the macro `m` (in Nightly builds, run with -Z macro-backtrace for more info)
