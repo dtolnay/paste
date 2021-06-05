@@ -105,13 +105,19 @@
 //!
 //! Use `$var:snake` to convert CamelCase input to snake\_case.
 //! Use `$var:camel` to convert snake\_case to CamelCase.
+//! Use `$var:capitalize` to transform the first character to uppercase.
+//! Use `$var:decapitalize` to transform the first character to lowercase.
 //! These compose, so for example `$var:snake:upper` would give you SCREAMING\_CASE.
 //!
-//! The precise Unicode conversions are as defined by [`str::to_lowercase`] and
-//! [`str::to_uppercase`].
+//! If you want lowerCamelCase, you can use `$var:camel:decapitalize`.
+//!
+//! The precise Unicode conversions are as defined by [`str::to_lowercase`],
+//! [`str::to_uppercase`], [`char::to_lowercase`], and [`char::to_uppercase`].
 //!
 //! [`str::to_lowercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_lowercase
 //! [`str::to_uppercase`]: https://doc.rust-lang.org/std/primitive.str.html#method.to_uppercase
+//! [`char::to_lowercase`]: https://doc.rust-lang.org/std/primitive.char.html#method.to_lowercase
+//! [`char::to_uppercase`]: https://doc.rust-lang.org/std/primitive.char.html#method.to_uppercase
 //!
 //! <br>
 //!

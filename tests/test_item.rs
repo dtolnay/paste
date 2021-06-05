@@ -161,6 +161,48 @@ mod test_to_camel {
     }
 }
 
+mod test_capitalize {
+    use paste::paste;
+
+    macro_rules! m {
+        ($id:ident) => {
+            paste! {
+                const CAPITALIZED: &str = stringify!([<$id:capitalize>]);
+                const CAPITALIZED_SNAKE: &str = stringify!([<$id:snake:capitalize>]);
+            }
+        };
+    }
+
+    m!(thisIsButATest);
+
+    #[test]
+    fn test_capitalize() {
+        assert_eq!(CAPITALIZED, "ThisIsButATest");
+        assert_eq!(CAPITALIZED_SNAKE, "This_is_but_a_test");
+    }
+}
+
+mod test_decapitalize {
+    use paste::paste;
+
+    macro_rules! m {
+        ($id:ident) => {
+            paste! {
+                const DECAPITALIZED: &str = stringify!([<$id:decapitalize>]);
+                const DECAPITALIZED_CAMEL: &str = stringify!([<$id:camel:decapitalize>]);
+            }
+        };
+    }
+
+    m!(This_is_but_a_test);
+
+    #[test]
+    fn test_capitalize() {
+        assert_eq!(DECAPITALIZED, "this_is_but_a_test");
+        assert_eq!(DECAPITALIZED_CAMEL, "thisIsButATest");
+    }
+}
+
 mod test_doc_expr {
     // https://github.com/dtolnay/paste/issues/29
 
