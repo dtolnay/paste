@@ -230,7 +230,7 @@ fn expand(
                         flatten_single_interpolation && !is_attribute,
                     )?;
                     if is_attribute {
-                        nested = expand_attr(nested, span, &mut group_contains_paste)?
+                        nested = expand_attr(nested, span, &mut group_contains_paste)?;
                     }
                     let group = if group_contains_paste {
                         let mut group = Group::new(delimiter, nested);
