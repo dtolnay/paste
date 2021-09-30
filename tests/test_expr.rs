@@ -1,3 +1,5 @@
+#![allow(clippy::redundant_static_lifetimes)]
+
 use paste::paste;
 
 #[test]
