@@ -1,5 +1,3 @@
-#![allow(clippy::redundant_static_lifetimes)]
-
 use paste::paste;
 
 #[test]
@@ -12,8 +10,8 @@ fn test_shared_hygiene() {
 
 #[test]
 fn test_repeat() {
-    const ROCKET_A: &'static str = "/a";
-    const ROCKET_B: &'static str = "/b";
+    const ROCKET_A: &str = "/a";
+    const ROCKET_B: &str = "/b";
 
     macro_rules! routes {
         ($($route:ident),*) => {{
@@ -29,7 +27,7 @@ fn test_repeat() {
 
 #[test]
 fn test_integer() {
-    const CONST0: &'static str = "const0";
+    const CONST0: &str = "const0";
 
     let pasted = paste!([<CONST 0>]);
     assert_eq!(pasted, CONST0);
