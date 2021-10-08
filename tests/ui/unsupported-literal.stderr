@@ -1,5 +1,5 @@
 error: unsupported literal
- --> $DIR/tests/ui/unsupported-literal.rs:4:10
+ --> tests/ui/unsupported-literal.rs:4:10
   |
 4 |     fn [<1e+100>]() {}
   |          ^^^^^^

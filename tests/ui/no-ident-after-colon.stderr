@@ -1,5 +1,5 @@
 error: expected identifier after `:`
- --> $DIR/tests/ui/no-ident-after-colon.rs:4:15
+ --> tests/ui/no-ident-after-colon.rs:4:15
   |
 4 |     fn [<name:0>]() {}
   |               ^

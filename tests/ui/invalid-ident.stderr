@@ -1,5 +1,5 @@
 error: `"0f"` is not a valid identifier
- --> $DIR/tests/ui/invalid-ident.rs:4:8
+ --> tests/ui/invalid-ident.rs:4:8
   |
 4 |     fn [<0 f>]() {}
   |        ^^^^^^^
