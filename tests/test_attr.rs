@@ -43,3 +43,18 @@ fn test_paste_cfg() {
 
     let _ = new;
 }
+
+#[test]
+fn test_path_in_attr() {
+    macro_rules! m {
+        (#[x = $x:ty]) => {
+            stringify!($x)
+        };
+    }
+
+    let ty = paste! {
+        m!(#[x = foo::Bar])
+    };
+
+    assert_eq!("foo::Bar", ty);
+}

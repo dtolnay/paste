@@ -1,6 +1,6 @@
 use crate::error::Result;
 use crate::segment::{self, Segment};
-use proc_macro::{Delimiter, Group, Span, TokenStream, TokenTree};
+use proc_macro::{Delimiter, Group, Spacing, Span, TokenStream, TokenTree};
 use std::iter;
 use std::mem;
 use std::str::FromStr;
@@ -157,6 +157,8 @@ fn is_stringlike(token: &TokenTree) -> bool {
                 None => false,
             }
         }
-        TokenTree::Punct(punct) => punct.as_char() == '\'' || punct.as_char() == ':',
+        TokenTree::Punct(punct) => {
+            punct.as_char() == '\'' || punct.as_char() == ':' && punct.spacing() == Spacing::Alone
+        }
     }
 }
