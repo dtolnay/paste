@@ -139,6 +139,7 @@
 
 #![allow(
     clippy::doc_markdown,
+    clippy::match_same_arms,
     clippy::module_name_repetitions,
     clippy::needless_doctest_main,
     clippy::too_many_lines
