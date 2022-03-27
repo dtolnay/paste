@@ -26,10 +26,19 @@ fn test_repeat() {
 }
 
 #[test]
-fn test_integer() {
+fn test_literals() {
     const CONST0: &str = "const0";
 
     let pasted = paste!([<CONST 0>]);
+    assert_eq!(pasted, CONST0);
+
+    let pasted = paste!([<CONST '0'>]);
+    assert_eq!(pasted, CONST0);
+
+    let pasted = paste!([<CONST "0">]);
+    assert_eq!(pasted, CONST0);
+
+    let pasted = paste!([<CONST r"0">]);
     assert_eq!(pasted, CONST0);
 }
 
