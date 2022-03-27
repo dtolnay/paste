@@ -40,6 +40,9 @@ fn test_literals() {
 
     let pasted = paste!([<CONST r"0">]);
     assert_eq!(pasted, CONST0);
+
+    let pasted = paste!([<CONST '\u{30}'>]);
+    assert_eq!(pasted, CONST0);
 }
 
 #[test]
