@@ -364,7 +364,11 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
 
     for segment in &mut segments {
         if let Segment::String(string) = segment {
-            if string.value.contains(&['#', '\\', '.', '+'][..]) {
+            if string.value.contains(&['#', '\\', '.', '+'][..])
+                || string.value.starts_with("b'")
+                || string.value.starts_with("b\"")
+                || string.value.starts_with("br\"")
+            {
                 return Err(Error::new(string.span, "unsupported literal"));
             }
             string.value = string
