@@ -155,6 +155,7 @@ use crate::attr::expand_attr;
 use crate::error::{Error, Result};
 use crate::segment::Segment;
 use proc_macro::{Delimiter, Group, Ident, Punct, Spacing, Span, TokenStream, TokenTree};
+use std::char;
 use std::iter;
 use std::panic;
 
@@ -364,6 +365,16 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
 
     for segment in &mut segments {
         if let Segment::String(string) = segment {
+            if string.value.starts_with("'\\u{") {
+                let hex = &string.value[4..string.value.len() - 2];
+                if let Ok(unsigned) = u32::from_str_radix(hex, 16) {
+                    if let Some(ch) = char::from_u32(unsigned) {
+                        string.value.clear();
+                        string.value.push(ch);
+                        continue;
+                    }
+                }
+            }
             if string.value.contains(&['#', '\\', '.', '+'][..])
                 || string.value.starts_with("b'")
                 || string.value.starts_with("b\"")
