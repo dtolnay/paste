@@ -371,11 +371,15 @@ fn parse_bracket_as_segments(input: TokenStream, scope: Span) -> Result<Vec<Segm
             {
                 return Err(Error::new(string.span, "unsupported literal"));
             }
-            string.value = string
-                .value
-                .replace('"', "")
-                .replace('\'', "")
-                .replace('-', "_");
+            let mut range = 0..string.value.len();
+            if string.value.starts_with("r\"") {
+                range.start += 2;
+                range.end -= 1;
+            } else if string.value.starts_with(&['"', '\''][..]) {
+                range.start += 1;
+                range.end -= 1;
+            }
+            string.value = string.value[range].replace('-', "_");
         }
     }
 
