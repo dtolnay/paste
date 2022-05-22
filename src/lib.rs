@@ -138,6 +138,7 @@
 //! ```
 
 #![allow(
+    clippy::derive_partial_eq_without_eq,
     clippy::doc_markdown,
     clippy::match_same_arms,
     clippy::module_name_repetitions,
