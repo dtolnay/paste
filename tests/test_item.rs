@@ -128,13 +128,13 @@ mod test_to_snake {
         };
     }
 
-    m!(ThisIsButATest);
+    m!(ThisIsBut1testOf2tests);
 
     #[test]
     fn test_to_snake() {
-        assert_eq!(DEFAULT_SNAKE, "this_is_but_a_test");
-        assert_eq!(LOWER_SNAKE, "this_is_but_a_test");
-        assert_eq!(UPPER_SNAKE, "THIS_IS_BUT_A_TEST");
+        assert_eq!(DEFAULT_SNAKE, "this_is_but1test_of2tests");
+        assert_eq!(LOWER_SNAKE, "this_is_but1test_of2tests");
+        assert_eq!(UPPER_SNAKE, "THIS_IS_BUT1TEST_OF2TESTS");
     }
 }
 
@@ -151,13 +151,13 @@ mod test_to_camel {
         };
     }
 
-    m!(this_is_but_a_test);
+    m!(this_is_but_1Test_of2Tests);
 
     #[test]
     fn test_to_camel() {
-        assert_eq!(DEFAULT_CAMEL, "ThisIsButATest");
-        assert_eq!(LOWER_CAMEL, "thisisbutatest");
-        assert_eq!(UPPER_CAMEL, "THISISBUTATEST");
+        assert_eq!(DEFAULT_CAMEL, "ThisIsBut1testOf2tests");
+        assert_eq!(LOWER_CAMEL, "thisisbut1testof2tests");
+        assert_eq!(UPPER_CAMEL, "THISISBUT1TESTOF2TESTS");
     }
 }
 
