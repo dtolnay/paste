@@ -2,13 +2,13 @@
 name = "paste"
 version = "1.0.7"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-edition = "2018"
-rust-version = "1.31"
-license = "MIT OR Apache-2.0"
-description = "Macros for all your token pasting needs"
-repository = "https://github.com/dtolnay/paste"
 categories = ["no-std"]
+description = "Macros for all your token pasting needs"
+edition = "2018"
+license = "MIT OR Apache-2.0"
 readme = "README.md"
+repository = "https://github.com/dtolnay/paste"
+rust-version = "1.31"
 
 [lib]
 proc-macro = true
