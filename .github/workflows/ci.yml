@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.46.0]
+        rust: [nightly, beta, stable, 1.51.0]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
