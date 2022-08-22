@@ -247,3 +247,24 @@ mod test_local_setter {
         assert_eq!(a.val, 42);
     }
 }
+
+// https://github.com/dtolnay/paste/issues/85
+#[test]
+fn test_top_level_none_delimiter() {
+    macro_rules! clone {
+        ($val:expr) => {
+            paste! {
+                $val.clone()
+            }
+        };
+    }
+
+    #[derive(Clone)]
+    struct A;
+
+    impl A {
+        fn consume_self(self) {}
+    }
+
+    clone!(&A).consume_self();
+}
