@@ -263,7 +263,9 @@ fn test_top_level_none_delimiter() {
     struct A;
 
     impl A {
-        fn consume_self(self) {}
+        fn consume_self(self) {
+            let _ = self;
+        }
     }
 
     clone!(&A).consume_self();
