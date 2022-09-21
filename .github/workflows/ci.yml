@@ -18,21 +18,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        rust: [nightly, beta, stable, 1.46.0]
+        rust: [nightly, beta, stable, 1.56.0]
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{matrix.rust}}
       - run: cargo test
-
-  mintest:
-    name: Rust 1.36.0
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: dtolnay/rust-toolchain@1.36.0
-      - run: cargo test --test test_item
 
   msrv:
     name: Rust 1.31.0
