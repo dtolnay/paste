@@ -26,7 +26,7 @@ fn test_repeat() {
 }
 
 #[test]
-fn test_literals() {
+fn test_literal_to_identifier() {
     const CONST0: &str = "const0";
 
     let pasted = paste!([<CONST 0>]);
@@ -43,6 +43,25 @@ fn test_literals() {
 
     let pasted = paste!([<CONST '\u{30}'>]);
     assert_eq!(pasted, CONST0);
+}
+
+#[test]
+fn test_literal_suffix() {
+    macro_rules! vec_insert {
+        ($bit:tt) => {
+            paste! {
+                fn [<vector_insert_ $bit _bit>](insert_size: usize) {
+                    let mut [<vec_ $bit>] = Vec::new();
+                    for _ in 0..insert_size {
+                        [<vec_ $bit>].insert(0, [<1_u $bit>]);
+                    }
+                }
+            }
+        };
+    }
+
+    vec_insert!(32);
+    vector_insert_32_bit(2);
 }
 
 #[test]
