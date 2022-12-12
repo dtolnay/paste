@@ -47,21 +47,13 @@ fn test_literal_to_identifier() {
 
 #[test]
 fn test_literal_suffix() {
-    macro_rules! vec_insert {
+    macro_rules! literal {
         ($bit:tt) => {
-            paste! {
-                fn [<vector_insert_ $bit _bit>](insert_size: usize) {
-                    let mut [<vec_ $bit>] = Vec::new();
-                    for _ in 0..insert_size {
-                        [<vec_ $bit>].insert(0, [<1_u $bit>]);
-                    }
-                }
-            }
+            paste!([<1_u $bit>])
         };
     }
 
-    vec_insert!(32);
-    vector_insert_32_bit(2);
+    assert_eq!(literal!(32), 1);
 }
 
 #[test]
