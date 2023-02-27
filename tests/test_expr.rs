@@ -1,3 +1,5 @@
+#![allow(clippy::let_underscore_untyped)]
+
 use paste::paste;
 
 #[test]
