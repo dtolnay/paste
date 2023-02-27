@@ -199,11 +199,11 @@ fn test_env_to_camel() {
 mod test_x86_feature_literal {
     // work around https://github.com/rust-lang/rust/issues/72726
 
-    use paste::paste;
-
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     macro_rules! my_is_x86_feature_detected {
         ($feat:literal) => {
+            use paste::paste;
+
             paste! {
                 #[test]
                 fn test() {
