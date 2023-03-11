@@ -6,6 +6,7 @@ error: expected identifier, found `0f`
 5 | | }
   | |_^ expected identifier
   |
+  = help: identifiers cannot start with a number
   = note: this error originates in the macro `paste` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: `"f\""` is not a valid identifier
