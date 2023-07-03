@@ -2,7 +2,7 @@
 name = "paste"
 version = "1.0.12"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
-categories = ["development-tools", "no-std"]
+categories = ["development-tools", "no-std", "no-std::no-alloc"]
 description = "Macros for all your token pasting needs"
 edition = "2018"
 keywords = ["macros"]
