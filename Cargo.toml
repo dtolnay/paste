@@ -1,6 +1,6 @@
 [package]
 name = "paste"
-version = "1.0.13"
+version = "1.0.14"
 authors = ["David Tolnay <dtolnay@gmail.com>"]
 categories = ["development-tools", "no-std", "no-std::no-alloc"]
 description = "Macros for all your token pasting needs"
