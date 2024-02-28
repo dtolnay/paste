@@ -177,7 +177,7 @@ mod test_doc_expr {
         };
     }
 
-    doc_expr!(stringify!());
+    doc_expr!(stringify!(...));
 
     #[test]
     fn test_doc_expr() {
