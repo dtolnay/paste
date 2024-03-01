@@ -140,6 +140,32 @@ mod test_to_snake {
     }
 }
 
+mod test_to_snake_acme {
+    use inflector::cases::screamingsnakecase::to_screaming_snake_case;
+    use inflector::cases::snakecase::to_snake_case;
+    use paste::paste;
+
+    macro_rules! m {
+        ($id:ident) => {
+            paste! {
+                const RAW: &str = stringify!([<$id>]);
+                const LOWER_SNAKE: &str = stringify!([<$id:snake:lower>]);
+                const UPPER_SNAKE: &str = stringify!([<$id:snake:upper>]);
+            }
+        };
+    }
+    m!(ACMECorp);
+
+    #[test]
+    fn test_to_snake_acme() {
+        let lower_snake_inflector: &str = &to_snake_case(RAW);
+        let screaming_snake_inflector: &str = &to_screaming_snake_case(RAW);
+
+        assert_eq!(LOWER_SNAKE, lower_snake_inflector);
+        assert_eq!(UPPER_SNAKE, screaming_snake_inflector);
+    }
+}
+
 mod test_to_camel {
     use paste::paste;
 
