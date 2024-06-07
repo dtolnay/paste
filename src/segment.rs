@@ -1,6 +1,8 @@
-use crate::error::{Error, Result};
-use proc_macro::{token_stream, Delimiter, Ident, Span, TokenTree};
 use std::iter::Peekable;
+
+use proc_macro::{token_stream, Delimiter, Ident, Span, TokenTree};
+
+use crate::error::{Error, Result};
 
 pub(crate) enum Segment {
     String(LitStr),
@@ -191,6 +193,31 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
                             prev = ch;
                         }
                         evaluated.push(acc.to_lowercase());
+                    }
+                    "lowerCamel" => {
+                        let mut acc = String::new();
+                        let mut prev = '_';
+                        for (idx, ch) in last.chars().enumerate() {
+                            if idx == 0 {
+                                for chl in ch.to_lowercase() {
+                                    acc.push(chl);
+                                }
+                            } else if ch != '_' {
+                                if prev == '_' {
+                                    for chu in ch.to_uppercase() {
+                                        acc.push(chu);
+                                    }
+                                } else if prev.is_uppercase() {
+                                    for chl in ch.to_lowercase() {
+                                        acc.push(chl);
+                                    }
+                                } else {
+                                    acc.push(ch);
+                                }
+                            }
+                            prev = ch;
+                        }
+                        evaluated.push(acc);
                     }
                     "camel" => {
                         let mut acc = String::new();
