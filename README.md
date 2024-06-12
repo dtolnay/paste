@@ -129,6 +129,8 @@ macro_rules! method_new {
     ($ret:ident) => {
         paste! {
             #[doc = "Create a new `" $ret "` object."]
+            // This will generate a doc alias over "Paste_new".
+            #[doc(alias = $ret _new)]
             pub fn new() -> $ret { todo!() }
         }
     };
