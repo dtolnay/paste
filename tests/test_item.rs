@@ -231,13 +231,13 @@ mod test_type_in_fn_arg {
 
     use paste::paste;
 
-    fn _jit_address(_node: ()) {}
+    fn jit_address(_node: ()) {}
 
     macro_rules! jit_reexport {
         ($fn:ident, $arg:ident : $typ:ty) => {
             paste! {
                 pub fn $fn($arg: $typ) {
-                    [<_jit_ $fn>]($arg);
+                    [<jit_ $fn>]($arg);
                 }
             }
         };
