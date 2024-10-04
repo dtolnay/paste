@@ -115,26 +115,30 @@
 //!
 //! <br>
 //!
-//! # Pasting documentation strings
-//!
-//! Within the `paste!` macro, arguments to a #\[doc ...\] attribute are
-//! implicitly concatenated together to form a coherent documentation string.
-//!
+//! ## Pasting string literals into attributes
+//! 
+//! Within the `paste!` macro, if there are two or more arguments to an attribute they are implicitly
+//! concatenated together to form a string literal.
+//! 
 //! ```
 //! use paste::paste;
-//!
+//! 
 //! macro_rules! method_new {
 //!     ($ret:ident) => {
 //!         paste! {
 //!             #[doc = "Create a new `" $ret "` object."]
+//!             #[cfg(feature = "" $ret:snake)]
 //!             pub fn new() -> $ret { todo!() }
 //!         }
 //!     };
 //! }
-//!
+//! 
 //! pub struct Paste {}
-//!
-//! method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
+//! 
+//! // expands to:
+//! // #[doc = "Create a new `Paste` object."]
+//! // #[cfg(feature = "paste")]
+//! method_new!(Paste);
 //! ```
 
 #![doc(html_root_url = "https://docs.rs/paste/1.0.15")]

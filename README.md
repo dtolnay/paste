@@ -117,10 +117,10 @@ The precise Unicode conversions are as defined by [`str::to_lowercase`] and
 
 <br>
 
-## Pasting documentation strings
+## Pasting string literals into attributes
 
-Within the `paste!` macro, arguments to a #\[doc ...\] attribute are implicitly
-concatenated together to form a coherent documentation string.
+Within the `paste!` macro, if there are two or more arguments to an attribute they are implicitly
+concatenated together to form a string literal.
 
 ```rust
 use paste::paste;
@@ -129,6 +129,7 @@ macro_rules! method_new {
     ($ret:ident) => {
         paste! {
             #[doc = "Create a new `" $ret "` object."]
+            #[cfg(feature = "" $ret:snake)]
             pub fn new() -> $ret { todo!() }
         }
     };
@@ -136,7 +137,10 @@ macro_rules! method_new {
 
 pub struct Paste {}
 
-method_new!(Paste);  // expands to #[doc = "Create a new `Paste` object"]
+// expands to:
+// #[doc = "Create a new `Paste` object."]
+// #[cfg(feature = "paste")]
+method_new!(Paste);
 ```
 
 <br>
