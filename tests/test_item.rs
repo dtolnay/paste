@@ -153,13 +153,22 @@ mod test_to_camel {
         };
     }
 
-    m!(this_is_but_a_test);
-
     #[test]
     fn test_to_camel() {
+        m!(this_is_but_a_test);
+
         assert_eq!(DEFAULT_CAMEL, "ThisIsButATest");
         assert_eq!(LOWER_CAMEL, "thisisbutatest");
         assert_eq!(UPPER_CAMEL, "THISISBUTATEST");
+    }
+
+    #[test]
+    fn test_to_camel_with_underscores() {
+        m!(__this_is_but__a_test);
+
+        assert_eq!(DEFAULT_CAMEL, "__ThisIsBut_ATest");
+        assert_eq!(LOWER_CAMEL, "__thisisbut_atest");
+        assert_eq!(UPPER_CAMEL, "__THISISBUT_ATEST");
     }
 }
 

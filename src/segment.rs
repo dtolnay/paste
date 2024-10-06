@@ -208,6 +208,8 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
                                 } else {
                                     acc.push(ch);
                                 }
+                            } else if prev == '_' {
+                                acc.push(ch);
                             }
                             prev = ch;
                         }
