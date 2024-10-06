@@ -6,6 +6,8 @@ Macros for all your token pasting needs
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-paste-66c2a5?style=for-the-badge&labelColor=555555&logo=docs.rs" height="20">](https://docs.rs/paste)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/dtolnay/paste/ci.yml?branch=master&style=for-the-badge" height="20">](https://github.com/dtolnay/paste/actions?query=branch%3Amaster)
 
+_(This project is no longer maintained.)_
+
 The nightly-only [`concat_idents!`] macro in the Rust standard library is
 notoriously underpowered in that its concatenated identifiers can only refer to
 existing items, they can never be used to define something new.
