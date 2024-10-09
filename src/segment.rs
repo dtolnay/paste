@@ -201,12 +201,10 @@ pub(crate) fn paste(segments: &[Segment]) -> Result<String> {
                                     for chu in ch.to_uppercase() {
                                         acc.push(chu);
                                     }
-                                } else if prev.is_uppercase() {
+                                } else {
                                     for chl in ch.to_lowercase() {
                                         acc.push(chl);
                                     }
-                                } else {
-                                    acc.push(ch);
                                 }
                             }
                             prev = ch;
