@@ -14,6 +14,9 @@ rust-version = "1.31"
 [lib]
 proc-macro = true
 
+[dependencies]
+Inflector = {version = "0.11.4"}
+
 [dev-dependencies]
 paste-test-suite = { version = "0", path = "tests/macros" }
 rustversion = "1.0"
